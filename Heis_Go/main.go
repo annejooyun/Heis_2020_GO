@@ -1,18 +1,18 @@
 package main
 
-//import "./elevio"
+import "./elevio"
 import "./control-go"
-//import "./orderHandler"
+import "./orderHandler"
 import "fmt"
 
 func main(){
     elevator := control.InitializeElevator()
 
 
-  //  var d elevio.MotorDirection = elevio.MD_Up
-    //elevio.SetMotorDirection(d)
+    var d elevio.MotorDirection = elevio.MD_Up
+    elevio.SetMotorDirection(d)
     fmt.Println(elevator)
-/*
+
     drv_buttons := make(chan elevio.ButtonEvent)
     drv_floors  := make(chan int)
     drv_obstr   := make(chan bool)
@@ -26,9 +26,12 @@ func main(){
 
     for {
         select {
-        case a := <- drv_buttons:
-            fmt.Printf("%+v\n", a)
-            elevio.SetButtonLamp(a.Button, a.Floor, true)
+        case buttonPressed := <- drv_buttons:
+            orderhandler.AddOrder(&elevator, buttonPressed)
+            fmt.Printf("%+v\n", buttonPressed)
+            fmt.Printf("%+v\n", elevator)
+            elevio.SetButtonLamp(buttonPressed.Button, buttonPressed.Floor, true)
+            
 
         case a := <- drv_floors:
             fmt.Printf("%+v\n", a)
@@ -57,5 +60,5 @@ func main(){
                 }
             }
         }
-    }*/
+    }
 }

@@ -8,9 +8,9 @@ const Elev_ID = 1
 
 type State int
 const (
-  idle   State = 0
-  moving       = 1
-  doorOpen     = 2
+  Idle   State = 0
+  Moving       = 1
+  DoorOpen     = 2
 )
 
 type Elev struct {
@@ -30,6 +30,19 @@ func InitializeElevator() Elev {
     floor = elevio.GetFloor()
   }
   elevio.SetMotorDirection(elevio.MD_Stop)
-  elevator := Elev{Elev_ID, idle,elevio.MD_Stop,floor,[N_FLOORS][N_BUTTONS]int{}}
+  elevator := Elev{Elev_ID,Idle,elevio.MD_Stop,floor,[N_FLOORS][N_BUTTONS]int{}}
+
   return elevator
+}
+
+func UpdateState(elevator *Elev, state State){
+  elevator.State = state
+}
+
+func UpdateDirection(elevator *Elev, direction elevio.MotorDirection) {
+  elevator.Direction = direction
+}
+
+func UpdatePrevFloor(elevator *Elev, floor int) {
+  elevator.PrevFloor = floor
 }

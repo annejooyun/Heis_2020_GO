@@ -12,7 +12,7 @@ var startUpTime time.Time = time.Now()
 
 
 
-func timerStart(duration int) {
+func TimerStart(duration int) {
   startTime := time.Now()
   endTime = startTime.Add(time.Second*time.Duration(duration))
   timerActive = true
@@ -25,10 +25,10 @@ func stopTimer() {
 }
 
 
-func pollTimeOut(recieve chan<- bool) {
+func PollTimeOut(recieve chan<- bool) {
   for {
     if timerActive && endTime.Sub(time.Now()) < 0 {
-      receive <- true
+      recieve <- true
       stopTimer()
     }
   }

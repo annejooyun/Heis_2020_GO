@@ -15,13 +15,15 @@ const (
 
 type Elev struct {
   Id int
-  State State
-  Direction elevio.MotorDirection
-  PrevFloor int  //prevFloor might be current floor
+  CurrState State
+  PrevState State
+  CurrDirection elevio.MotorDirection
+  PrevDirection elevio.MotorDirection
+  Floor int  //current or previous floor
   OrderList [N_FLOORS][N_BUTTONS]int
 }
 
-
+//Moves the elevator to a known floor. Makes elevator object. Turns off lights
 func InitializeElevator() Elev {
   elevio.Init("localhost:15657", N_FLOORS)
   elevio.SetMotorDirection(elevio.MD_Down)
@@ -30,19 +32,39 @@ func InitializeElevator() Elev {
     floor = elevio.GetFloor()
   }
   elevio.SetMotorDirection(elevio.MD_Stop)
-  elevator := Elev{Elev_ID,Idle,elevio.MD_Stop,floor,[N_FLOORS][N_BUTTONS]int{}}
+  initializeLights()
+  elevator := Elev{Elev_ID,Idle,Idle,elevio.MD_Stop,elevio.MD_Stop,floor,[N_FLOORS][N_BUTTONS]int{}}
 
   return elevator
 }
 
-func UpdateState(elevator *Elev, state State){
-  elevator.State = state
+//Turns off all lights when initializing the elevator
+func initializeLights() {
+  for floor:= 0; floor < N_FLOORS; floor++ {
+    elevio.SetButtonLamp(elevio.BT_HallUp, floor, false)
+    elevio.SetButtonLamp(elevio.BT_HallDown, floor, false)
+    elevio.SetButtonLamp(elevio.BT_Cab, floor, false)
+  }
+  elevio.SetDoorOpenLamp(false)
+  elevio.SetStopLamp(false)
 }
 
-func UpdateDirection(elevator *Elev, direction elevio.MotorDirection) {
-  elevator.Direction = direction
+func UpdateCurrState(elevator *Elev, state State){
+  elevator.CurrState = state
+}
+
+func UpdatePrevState(elevator *Elev){
+  elevator.PrevState = elevator.CurrState
+}
+
+func UpdateCurrDirection(elevator *Elev, direction elevio.MotorDirection) {
+  elevator.CurrDirection = direction
+}
+
+func UpdatePrevDirection(elevator *Elev) {
+  elevator.PrevDirection = elevator.CurrDirection
 }
 
 func UpdatePrevFloor(elevator *Elev, floor int) {
-  elevator.PrevFloor = floor
+  elevator.Floor = floor
 }

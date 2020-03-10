@@ -14,7 +14,7 @@ func removeOrder(elevator *control.Elev, button elevio.ButtonType, floor int) {
 
 
 func OrdersAbove(elevator *control.Elev) bool {
-	for floor := elevator.PrevFloor + 1; floor < control.N_FLOORS; floor++ {
+	for floor := elevator.Floor + 1; floor < control.N_FLOORS; floor++ {
 		for btn := 0; btn < control.N_BUTTONS; btn++ {
 			if elevator.OrderList[floor][btn] == 1 {
 				return true
@@ -25,7 +25,7 @@ func OrdersAbove(elevator *control.Elev) bool {
 }
 
 func OrdersBelow(elevator *control.Elev) bool {
-	for floor := 0; floor < elevator.PrevFloor; floor++ {
+	for floor := 0; floor < elevator.Floor; floor++ {
 		for btn := 0; btn < control.N_BUTTONS; btn++ {
 			if elevator.OrderList[floor][btn] == 1 {
 				return true
@@ -38,20 +38,25 @@ func OrdersBelow(elevator *control.Elev) bool {
 /*
 func ClearOrdersAtCurrentFloor(&elevator control.Elev) control.Elev {
 	//Always delete cab order at current floor
-	removeOrder(&elevator, elevio.BT_Cab, elevator.PrevFloor)
+	removeOrder(&elevator, elevio.BT_Cab, elevator.Floor)
+  elevio.SetButtonLamp(elevio.BT_Cab, elevator.Floor, false)
 	switch elevator.Direction {
 	case elevio.MD_Up:
 		//If direction is up, delete orders of type Hall Up.
-    removeOrder(&elevator, elevio.BT_HallUp, elevator.PrevFloor)
+    removeOrder(&elevator, elevio.BT_HallUp, elevator.Floor)
+    elevio.SetButtonLamp(elevio.BT_HallUp, elevator.Floor, false)
 		if !stateMachine.OrdersAbove(&elevator) {
-        removeOrder(&elevator, elevio.BT_HallDown, elevator.PrevFloor)
+        removeOrder(&elevator, elevio.BT_HallDown, elevator.Floor)
+        elevio.SetButtonLamp(elevio.BT_HallDown, elevator.Floor, false)
 			}
 			break
 	case elevio.MD_Down:
 		//If direction is down, delete orders of type Hall down.
-		removeOrder(&elevator, elevio.BT_HallDown, elevator.PrevFloor)
+		removeOrder(&elevator, elevio.BT_HallDown, elevator.Floor)
+    elevio.SetButtonLamp(elevio.BT_HallDown, elevator.Floor, false)
 		if !stateMachine.OrdersBelow(&elevator) {
-			removeOrder(&elevator, elevio.BT_HallUp, elevator.PrevFloor)
+			removeOrder(&elevator, elevio.BT_HallUp, elevator.Floor)
+      elevio.SetButtonLamp(elevio.BT_HallUp, elevator.Floor, false)
 		}
 		break
 	case elevio.MD_Stop:
@@ -62,10 +67,15 @@ func ClearOrdersAtCurrentFloor(&elevator control.Elev) control.Elev {
 	return elevator
 }*/
 
-func ClearOrdersAtCurrentFloor(elevator *control.Elev) control.Elev {
+func ClearOrdersAtCurrentFloor(elevator *control.Elev) {
 	//Always delete cab order at current floor
-	removeOrder(elevator, elevio.BT_Cab, elevator.PrevFloor)
-  removeOrder(elevator, elevio.BT_HallUp, elevator.PrevFloor)
-  removeOrder(elevator, elevio.BT_HallDown, elevator.PrevFloor)
-	return *elevator
+	removeOrder(elevator, elevio.BT_Cab, elevator.Floor)
+  removeOrder(elevator, elevio.BT_HallUp, elevator.Floor)
+  removeOrder(elevator, elevio.BT_HallDown, elevator.Floor)
+
+  //Turn off all lights at floor
+  elevio.SetButtonLamp(elevio.BT_Cab, elevator.Floor, false)
+  elevio.SetButtonLamp(elevio.BT_HallUp, elevator.Floor, false)
+  elevio.SetButtonLamp(elevio.BT_HallDown, elevator.Floor, false)
+
 }

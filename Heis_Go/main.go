@@ -4,7 +4,7 @@ import "./elevio"
 import "./control-go"
 import "./orderHandler"
 import "./stateMachine-go"
-//import "./timer"
+import "./timer"
 import "fmt"
 
 func main(){
@@ -19,13 +19,13 @@ func main(){
     drv_floors  := make(chan int)
     //drv_obstr   := make(chan bool)
     //drv_stop    := make(chan bool)
-  //  timer       := make(chan bool)
+    ch_timer       := make(chan bool)
 
     go elevio.PollButtons(drv_buttons)
     go elevio.PollFloorSensor(drv_floors)
     //go elevio.PollObstructionSwitch(drv_obstr)
     //go elevio.PollStopButton(drv_stop)
-    //go timer.PollTimeOut(timer)
+    go timer.PollTimeOut(ch_timer)
 
     for {
         select {
@@ -33,27 +33,31 @@ func main(){
             orderhandler.AddOrder(&elevator, buttonPressed)
             //fmt.Printf("%+v\n", buttonPressed)
             //fmt.Printf("%+v\n", elevator)
-            //elevio.SetButtonLamp(buttonPressed.Button, buttonPressed.Floor, true)
-            //if elevator.State == control.Idle {
-            //  stateMachine.ButtonPressedWhileIdle(&elevator,buttonPressed)
-            //}
+            elevio.SetButtonLamp(buttonPressed.Button, buttonPressed.Floor, true)
+            if elevator.CurrState == control.Idle {
+              stateMachine.ButtonPressedWhileIdle(&elevator,buttonPressed)
+            }
 
 
           case floor := <- drv_floors:
             fmt.Printf("%+v\n", floor)
+            prevFloor := elevator.Floor
             control.UpdatePrevFloor(&elevator, floor)
-            if floor != -1 && floor != elevator.PrevFloor {
+            elevio.SetFloorIndicator(floor)
+            if floor != -1 && floor != prevFloor {
               stateMachine.ArrivedOnFloor(&elevator)
             }
 
             //makes sure the elevator does not go out of bounds
-            if floor == control.N_FLOORS-1 {
+          /*  if floor == control.N_FLOORS-1 {
                 elevio.SetMotorDirection(elevio.MD_Down)
+                control.UpdateDirection(&elevator, elevio.MD_Down)
             } else if floor == 0 {
                 elevio.SetMotorDirection(elevio.MD_Up)
+                control.UpdateDirection(&elevator, elevio.MD_Up)
             }
 
-  /*
+
         case a := <- drv_obstr:
             fmt.Printf("%+v\n", a)
             if a {
@@ -69,9 +73,13 @@ func main(){
                     elevio.SetButtonLamp(b, f, false)
                 }
             }
+            */
 
-        case timeOut := <- timer:
-          fmt.Printf("TIMEOUT")*/
+        case timeOut := <- ch_timer:
+          fmt.Printf("TIMEOUT = ")
+          fmt.Printf("%+v\n", timeOut)
+          stateMachine.DoorTimeout(&elevator)
+
         }
     }
 }

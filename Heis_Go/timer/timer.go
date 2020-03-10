@@ -9,7 +9,7 @@ import (
 var endTime time.Time
 var timerActive bool
 var startUpTime time.Time = time.Now()
-
+var DoorOpenTime int = 3
 
 
 func TimerStart(duration int) {
@@ -25,7 +25,7 @@ func stopTimer() {
 }
 
 
-func PollTimeOut(recieve chan<- bool) {
+func PollTimeOut(recieve chan <- bool) {
   for {
     if timerActive && endTime.Sub(time.Now()) < 0 {
       recieve <- true

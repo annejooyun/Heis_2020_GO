@@ -11,9 +11,7 @@ func main(){
     elevator := control.InitializeElevator()
 
 
-
-
-    fmt.Println(elevator)
+    //fmt.Println(elevator)
 
     drv_buttons := make(chan elevio.ButtonEvent)
     drv_floors  := make(chan int)
@@ -31,6 +29,8 @@ func main(){
         select {
         case buttonPressed := <- drv_buttons:
             orderhandler.AddOrder(&elevator, buttonPressed)
+            fmt.Printf("%+v\n", elevator.OrderList)
+            fmt.Printf("%+v\n", elevator.CurrState)
             //fmt.Printf("%+v\n", buttonPressed)
             //fmt.Printf("%+v\n", elevator)
             elevio.SetButtonLamp(buttonPressed.Button, buttonPressed.Floor, true)
@@ -42,8 +42,10 @@ func main(){
           case floor := <- drv_floors:
             fmt.Printf("%+v\n", floor)
             prevFloor := elevator.Floor
-            control.UpdatePrevFloor(&elevator, floor)
+            control.UpdateFloor(&elevator, floor)
             elevio.SetFloorIndicator(floor)
+
+
             if floor != -1 && floor != prevFloor {
               stateMachine.ArrivedOnFloor(&elevator)
             }

@@ -1,6 +1,7 @@
 package control
 
 import "../elevio"
+import "fmt"
 
 const N_FLOORS = 4
 const N_BUTTONS = 3 // Number of button types (cab,hall up, hall down)
@@ -49,22 +50,44 @@ func initializeLights() {
   elevio.SetStopLamp(false)
 }
 
+
+func UpdateElevatorValues (elevator *Elev, direction elevio.MotorDirection, state State) {
+
+  UpdatePrevDirection(elevator)
+  UpdateCurrDirection(elevator, direction)
+  UpdatePrevState(elevator)
+  UpdateCurrState(elevator, state)
+
+}
+
+
+
+
+
 func UpdateCurrState(elevator *Elev, state State){
   elevator.CurrState = state
+  fmt.Println("New CurrState")
+  fmt.Printf("%+v\n", elevator)
 }
 
 func UpdatePrevState(elevator *Elev){
   elevator.PrevState = elevator.CurrState
+  fmt.Println("New PrevState")
+  fmt.Printf("%+v\n", elevator)
 }
 
 func UpdateCurrDirection(elevator *Elev, direction elevio.MotorDirection) {
   elevator.CurrDirection = direction
+  fmt.Println("New CurrDirection")
+  fmt.Printf("%+v\n", elevator)
 }
 
 func UpdatePrevDirection(elevator *Elev) {
   elevator.PrevDirection = elevator.CurrDirection
+  fmt.Println("New PrevDirection")
+  fmt.Printf("%+v\n", elevator)
 }
 
-func UpdatePrevFloor(elevator *Elev, floor int) {
+func UpdateFloor(elevator *Elev, floor int) {
   elevator.Floor = floor
 }

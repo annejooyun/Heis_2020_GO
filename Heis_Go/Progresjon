@@ -1,0 +1,27 @@
+
+25.03.2020:
+
+stateMachine fungerer som den skal.
+
+Har ryddet litt slik at modulene bruker færre funksjoner fra andre moduler. Sender heller meldinger over channels. Flere goroutines er lagt til, deriblant StartOrderHanling og UpdateElevatorStatus.
+
+Vi klarer nå å lagre status til den lokale heisen i en liste i modulen orderDistributer.
+
+
+Neste steg: 
+Få på plass cost-funksjon og sørge for at alle ordre distribueres til lokal heis, dersom ingen andre er koblet til.
+
+
+
+26.03.2020:
+
+Mesteparten av jobben er gjort med orderDistributer.
+
+cost funksjonen som beskrevet i oppgaven er implementert, men usikker på om vi kommer til å bruk den.
+
+En forenklet cost-funksjon er laget for bruk til testing.
+
+Bruk av cost-funksjon fungerer med én heis og systemet klarer nå å fordele alle ordre dersom det kun er én heis koblet til. 
+
+Neste steg:
+Finne en løsning for sending og behandling av meldinger (hovedsakelig meldingstyper og tolking av meldinger). Jobben ligger da i modulen messageHandler.

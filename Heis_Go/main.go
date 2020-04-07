@@ -24,15 +24,16 @@ func main(){
     //Creating channels:
 
     //Internal elevator channels
-    ch_new_order := make(chan elevio.ButtonEvent) //Whenever a new order is registered by the order handler, the order is sent to the fsm
+    ch_orderHandler_fsm_new_order := make(chan elevio.ButtonEvent) //Whenever a new order is registered by the order handler, the order is sent to the fsm
 
-    ch_fsm_to_order_handler := make(chan elevio.ButtonEvent) //All orders detected by the local elevator is sent to the order handler
+    ch_fsm_orderHandler_order := make(chan elevio.ButtonEvent) //All orders detected by the local elevator is sent to the order handler
 
-    ch_order_executed := make(chan bool) //Message from fsm that a order has been executed at current floor
+    ch_fsm_orderHandler_order_executed := make(chan bool) //Message from fsm that a order has been executed at current floor
+
+    ch_fsm_control_status_updated := make(chan bool) //Whenever a message is sent on this channel, a status update is sent to order distributer
 
 
     //Communication between elevator (control) and order distributer
-    ch_status_updated := make(chan bool) //Whenever a message is sent on this channel, a status update is sent to order distributer
 
     ch_internal_status_update := make(chan control.Elev) //channel for sending status updates.
 
@@ -51,22 +52,37 @@ func main(){
     ch_receive_external_order := make(chan orderDistributer.ExtOrder)
 
 
+    ch_bcast_order_executed_at_floor := make(chan []int)
+    ch_listen_order_executed_at_floor := make(chan []int)
+
+    ch_order_executed_by_me := make(chan []int)
+
 
 
     //Starting goroutines
-    go control.PollElevatorStatus(&elevator, ch_status_updated, ch_internal_status_update) //Whenever the status of the local elevator is updated, send an elevator copy to the order distributer
+    go control.PollInternalElevatorStatus(&elevator, ch_fsm_control_status_updated, ch_internal_status_update) //Whenever the status of the local elevator is updated, send an elevator copy to the order distributer
 
-    go orderHandler.StartOrderHandling(&elevator,ch_fsm_to_order_handler, ch_order_to_execute, ch_order_to_distribute, ch_new_order, ch_order_executed)
+    go orderHandler.StartOrderHandling(&elevator,ch_fsm_orderHandler_order, ch_order_to_execute, ch_order_to_distribute, ch_orderHandler_fsm_new_order, ch_fsm_orderHandler_order_executed, ch_bcast_order_executed_at_floor, ch_order_executed_by_me)
     //go messageHandler.Receive(&elevator,ch_status_receive)
 
-    go orderDistributer.UpdateElevatorStatus(ch_internal_status_update, ch_external_status_update, ch_broadcast_status_update)
+    go orderDistributer.PollStatusUpdates(ch_internal_status_update, ch_external_status_update, ch_broadcast_status_update)
+
     go orderDistributer.DistributeOrders(ch_order_to_distribute, ch_receive_external_order, ch_order_to_execute, ch_broadcast_order)
+
+    go orderDistributer.RegisterExecutedOrders(ch_listen_order_executed_at_floor, ch_order_executed_by_me)
+
+
+
 
     orderDistributer.StartSendingAndReceivingStatusUpdates(ch_broadcast_status_update, ch_external_status_update)
 
     orderDistributer.StartSendingAndReceivingOrders(ch_broadcast_order, ch_receive_external_order)
 
-    stateMachine.RunStateMachine(&elevator, ch_fsm_to_order_handler, ch_new_order, ch_status_updated, ch_order_executed)
+    orderDistributer.StartSendingAndReceivingOrderUpdates(ch_bcast_order_executed_at_floor, ch_listen_order_executed_at_floor)
+
+
+
+    stateMachine.RunStateMachine(&elevator, ch_fsm_orderHandler_order, ch_orderHandler_fsm_new_order, ch_fsm_control_status_updated, ch_fsm_orderHandler_order_executed)
 
 
 }

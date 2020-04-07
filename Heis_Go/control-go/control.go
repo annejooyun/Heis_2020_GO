@@ -103,7 +103,7 @@ func UpdateFloor(elevator *Elev, floor int) {
 }
 
 
-func PollElevatorStatus(elevator *Elev, status_updated chan bool, send_status_update chan Elev) {
+func PollInternalElevatorStatus(elevator *Elev, status_updated chan bool, send_status_update chan Elev) {
   for {
     select {
     case shouldUpdate := <- status_updated:

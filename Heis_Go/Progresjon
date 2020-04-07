@@ -25,3 +25,7 @@ Bruk av cost-funksjon fungerer med én heis og systemet klarer nå å fordele al
 
 Neste steg:
 Finne en løsning for sending og behandling av meldinger (hovedsakelig meldingstyper og tolking av meldinger). Jobben ligger da i modulen messageHandler.
+
+31.03.2020:
+
+Heisene kan nå snakke sammen og fordele ordre. Fungerer fint med enkel kost funksjon, men dersom denne blir for komplisert, oppstår det feil når man spamer ordrelista. Mulig vi må legge til et mellomledd som sørger for at den ikke gjør noe med knappetrykk hvis en knapp lyser e.l.

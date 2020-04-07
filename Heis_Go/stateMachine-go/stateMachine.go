@@ -148,7 +148,6 @@ func RunStateMachine(elevator *control.Elev, send_to_order_handler chan elevio.B
 				case order := <- new_order: //There has been added a new order to the order list.
 					if elevator.CurrState == control.Idle {
 						buttonPressedWhileIdle(elevator,order)
-						//status_updated <- true //There may have been a change in status
 					}
 
 
@@ -165,7 +164,7 @@ func RunStateMachine(elevator *control.Elev, send_to_order_handler chan elevio.B
 
             if floor != -1 && floor != prevFloor {
               arrivedOnFloor(elevator) //We have arrived on a new floor
-							status_updated <- true //There has been a change in status
+							//status_updated <- true //There has been a change in status
             }
 						status_updated <- true
 

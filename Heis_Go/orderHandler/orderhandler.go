@@ -65,7 +65,7 @@ func handleOrder(elevator *control.Elev, order elevio.ButtonEvent) {
 }
 
 
-func StartOrderHandling(elevator *control.Elev, order_from_fsm chan elevio.ButtonEvent, order_from_order_distributer chan elevio.ButtonEvent, distribute_order chan elevio.ButtonEvent, new_order chan elevio.ButtonEvent, order_executed chan bool) {
+func StartOrderHandling(elevator *control.Elev, order_from_fsm chan elevio.ButtonEvent, order_from_order_distributer chan elevio.ButtonEvent, distribute_order chan elevio.ButtonEvent, new_order chan elevio.ButtonEvent, order_executed chan bool, bcast_order_executed_at_floor chan []int, orders_executed chan []int) {
   for {
     select {
     case order := <- order_from_fsm:
@@ -75,11 +75,19 @@ func StartOrderHandling(elevator *control.Elev, order_from_fsm chan elevio.Butto
       } else {
         distribute_order <- order
       }
+
     case order := <- order_from_order_distributer:
       handleOrder(elevator, order)
       new_order <- order
 
     case <- order_executed:
+      //create list of orders executed on the form [button up, button down, floor]
+      ordersExecuted := []int{elevator.OrderList[elevator.Floor][0],elevator.OrderList[elevator.Floor][1]}
+      ordersExecuted = append(ordersExecuted, elevator.Floor)
+
+      bcast_order_executed_at_floor <- ordersExecuted
+      orders_executed<- ordersExecuted
+
       ClearOrdersAtCurrentFloor(elevator)
   }
   }

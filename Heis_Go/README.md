@@ -37,14 +37,14 @@ Order received:
 
 An order is received from the order handler on the channel "incoming_orders". We should then add the order to our execution list, and set the light in the correct order button. If we are in Idle, we should execute the order immediately.
 
-# control
+### control
 The control module has responsibility over the local elevator. 
 
 Here the elevator structure is made and constant elevator variables are declared, more specific number of buttons and number og floors.
 
 The module also contains elevator-specific functions. That is init functions and an functions that updates the atributes of the elevator object.
 
-# orderHandler
+### orderHandler
 The orderHandler module distributes all orders created by, or assigned to the local elevator. It also manages the list of orders in the local elevator.
 
 Whenever a button is pushed on the local elevator, the order is sent to the orderHandler, which decides wether the order can be taken directly (cab order) or needs to be distributed (hall orders). 
@@ -55,4 +55,4 @@ If an order has been assigned to the local elevator, it is sent from the order d
 
 If an order has been executed, the fsm will send a boolean signal (true) to the message handler, and by that saying: "The orders on the current floor are executed". The order handler then removes all orders on the current floor from the order list.
 
-# orderDistributer
+### orderDistributer

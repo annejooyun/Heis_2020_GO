@@ -18,7 +18,7 @@ In terminal running the simulator:
 
 ## Description of the modules:
 
-## stateMachine:
+# stateMachine:
 The stateMachine module is in charge of running one elevator according to the description. It has four triggers: Button pushed, floor detected, order received and timeOut.
 
 Button pushed:

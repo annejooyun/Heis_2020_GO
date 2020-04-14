@@ -75,10 +75,40 @@ Usage:
 
 Whenever the elevator stops on a floor, one or more orders are executed. The FSM then sends a True over the channel ch_order_executed, to the order handler, indicating that all orders on the floor the elevator is currently at, has been executed.
 
-#### ch_status_updated
+#### ch_status_changed
 Type: Bool
 
 Usage:
+
+#### ch_internal_status_update
+Type: Elev
+
+Usage:
+
+Whenever the Elevator object module is informed that the status has been changed, a copy of the elevator object is sent to the order distributer over the channel ch_internal_status_update
+
+#### ch_order_to_execute
+Type: ButtonEvent
+
+Usage:
+
+If the order distributer distributes an order to the local elevator, it is sent to the order handler via the channel ch_order_to_execute
+
+#### ch_order_to_distribute
+Type: ButtonEvent
+
+Usage:
+
+All hall-orders that the order handler receives from the fsm must be sent to the order distributer, to be distributed. Thus, all hall-orders from the FSM is sent to the order distributer via the channel ch_order_to_distribute.
+
+#### ch_internal_order_executed
+Type: Int[]
+
+Format: [floor (int), Button Hall Up (1/0), Button Hall Down (1/0)]
+
+Usage:
+
+When an order is executed at a floor, all orders registered at that floor in the order handler are executed. The order distributer must be informed of which orders the elevator has executed, to be able to 
 
 
 ## Communication sequences
@@ -92,6 +122,7 @@ The order distributer registers the status update correctly by placing the eleva
 All status updates are broadcasted to the same port (20000). The function StartSendingAndReceivingStatusUpdates starts two goroutines which at all time broadcasts all status updates sent on the channel ch_bcast_elev_Status, and sends all messages received on port 20000 on the channel ch_receive_elev_status. When an status update from another elevator has been received, the status lists are updated as described earlier.
 
 ### Order registered
+
 
 ### Order executed
 

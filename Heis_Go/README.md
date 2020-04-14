@@ -59,3 +59,10 @@ If an order has been executed, the fsm will send a boolean signal (true) to the 
 
 ## Comunication between modules
 ![Alt text](overview_channels.png)
+
+### Channel descriptions
+#### ch_order_registered
+Type: ButtonEvent
+
+##### Usage
+Whenever the FSM registeres that a button has been pushed, the order (ButtonEvent) corresponding to the pushed button is sent to the Order Handler

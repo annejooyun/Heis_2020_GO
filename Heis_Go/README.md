@@ -66,4 +66,34 @@ Type: ButtonEvent
 
 Usage:
 
-Whenever the FSM registeres that a button has been pushed, the order (ButtonEvent) corresponding to the pushed button is sent to the Order Handler
+Whenever the FSM registeres that a button has been pushed, the order (ButtonEvent) corresponding to the pushed button is sent to the Order Handler using the channel ch_order_registered.
+
+#### ch_order_executed:
+Type: Bool
+
+Usage:
+
+Whenever the elevator stops on a floor, one or more orders are executed. The FSM then sends a True over the channel ch_order_executed, to the order handler, indicating that all orders on the floor the elevator is currently at, has been executed.
+
+#### ch_status_updated
+Type: Bool
+
+Usage:
+
+
+## Communication sequences
+### Status update
+For the system to be able to correctly distribute orders, all elevators must know the status of all other elevators. The relevant information is each elevators current position, current direction and their order list.
+
+A status update is to be sent every time there has happend a status update. That is, every time the elevator reaches a new floor or changes direction. When this happens, the FSM module sends True over the channel ch_status_updated, by that telling the Elevator object module that there has been a change of state. The elevator object module then sends a copy of the elevator object to the order distributer, using the channel ch_internal_status_update.
+
+The order distributer registers the status update correctly by placing the elevator object in the list ELEVATOR_STATUS_LIST and the corresponding ID on the same place (same index) in the list ADDED_ELEVATORS. When the status update has been correctly registerd, it is sent over the channel ch_bcast_elev_Status, to be broadcasted.
+
+All status updates are broadcasted to the same port (20000). The function StartSendingAndReceivingStatusUpdates starts two goroutines which at all time broadcasts all status updates sent on the channel ch_bcast_elev_Status, and sends all messages received on port 20000 on the channel ch_receive_elev_status. When an status update from another elevator has been received, the status lists are updated as described earlier.
+
+### Order registered
+
+### Order executed
+
+
+## Data types

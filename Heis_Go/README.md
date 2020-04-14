@@ -58,4 +58,4 @@ If an order has been executed, the fsm will send a boolean signal (true) to the 
 ### orderDistributer
 
 ## Comunication between modules
-![Alt text](https://raw.githubusercontent.com/annejooyun/Heis_2020_Go/Heis_Go/overview_channels.png)
+![Alt text](relative/Heis_Go/overview_channels.png?raw=true "Title")

@@ -1,7 +1,9 @@
 package control
 
-import "../elevio"
-import "fmt"
+import (
+  "../elevio"
+  "fmt"
+)
 
 const N_FLOORS = 4
 const N_BUTTONS = 3 // Number of button types (cab,hall up, hall down)
@@ -74,7 +76,6 @@ func UpdateCurrState(elevator *Elev, state State){
   fmt.Println("New CurrState")
   fmt.Printf("%+v\n", elevator.CurrState)
 }
-
 
 
 func UpdatePrevState(elevator *Elev){

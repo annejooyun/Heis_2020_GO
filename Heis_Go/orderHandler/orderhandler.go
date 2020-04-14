@@ -1,8 +1,8 @@
 package orderHandler
 
 import (
-  "../elevio"
   "../control-go"
+  "../elevio"
   "fmt"
 )
 
@@ -55,7 +55,7 @@ func ClearOrdersAtCurrentFloor(elevator *control.Elev) {
 }
 
 
-func handleOrder(elevator *control.Elev, order elevio.ButtonEvent) {
+func takeOrder(elevator *control.Elev, order elevio.ButtonEvent) {
   addOrder(elevator, order)
 
   fmt.Printf("%+v\n", elevator.OrderList)
@@ -70,14 +70,14 @@ func StartOrderHandling(elevator *control.Elev, order_from_fsm chan elevio.Butto
     select {
     case order := <- order_from_fsm:
       if order.Button == elevio.BT_Cab {
-        handleOrder(elevator,order)
+        takeOrder(elevator,order)
         new_order <- order
       } else {
         distribute_order <- order
       }
 
     case order := <- order_from_order_distributer:
-      handleOrder(elevator, order)
+      takeOrder(elevator, order)
       new_order <- order
 
     case <- order_executed:

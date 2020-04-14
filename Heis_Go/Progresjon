@@ -3,7 +3,7 @@
 
 stateMachine fungerer som den skal.
 
-Har ryddet litt slik at modulene bruker færre funksjoner fra andre moduler. Sender heller meldinger over channels. Flere goroutines er lagt til, deriblant StartOrderHanling og UpdateElevatorStatus.
+Har ryddet litt slik at modulene bruker færre funksjoner fra andre moduler. Sender heller meldinger over channels. Flere goroutines er lagt til, deriblant StartOrderHandling og UpdateElevatorStatus.
 
 Vi klarer nå å lagre status til den lokale heisen i en liste i modulen orderDistributer.
 
@@ -28,4 +28,4 @@ Finne en løsning for sending og behandling av meldinger (hovedsakelig meldingst
 
 31.03.2020:
 
-Heisene kan nå snakke sammen og fordele ordre. Fungerer fint med enkel kost funksjon, men dersom denne blir for komplisert, oppstår det feil når man spamer ordrelista. Mulig vi må legge til et mellomledd som sørger for at den ikke gjør noe med knappetrykk hvis en knapp lyser e.l.
+Heisene kan nå snakke sammen og fordele ordre. Fungerer fint med enkel cost funksjon, men dersom denne blir for komplisert, oppstår det feil når man spamer ordrelista. Mulig vi må legge til et mellomledd som sørger for at den ikke gjør noe med knappetrykk hvis en knapp lyser e.l.s

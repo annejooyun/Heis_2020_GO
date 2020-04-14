@@ -3,9 +3,10 @@ package orderDistributer
 import (
   "../control-go"
 	"../elevio"
+  "../Network-go/network/bcast"
   //"../stateMachine-go"
   //"../orderHandler"
-  "../Network-go/network/bcast"
+
   "fmt"
 )
 
@@ -61,7 +62,7 @@ func costFunction(elevator control.Elev, order elevio.ButtonEvent) int {
   duration := 0
   switch test_elevator.CurrState {
   case control.Idle:
-    test_elevator.CurrDirection = stateMachine.ChooseDirection(&test_elevator)
+    test_elevator.CurrDirection = stateMachineHF.ChooseDirection(&test_elevator)
     if test_elevator.CurrDirection == elevio.MD_Stop {
       return duration
     }
@@ -82,10 +83,10 @@ func costFunction(elevator control.Elev, order elevio.ButtonEvent) int {
   }
 
   for {
-    if stateMachine.ShouldIStop(&test_elevator) {
+    if stateMachineHF.ShouldIStop(&test_elevator) {
       orderHandler.ClearOrdersAtCurrentFloor(&test_elevator)
       duration += DOOR_OPEN_TIME
-      test_elevator.CurrDirection = stateMachine.ChooseDirection(&test_elevator)
+      test_elevator.CurrDirection = stateMachineHF.ChooseDirection(&test_elevator)
       if test_elevator.CurrDirection == elevio.MD_Stop {
         return duration
       }

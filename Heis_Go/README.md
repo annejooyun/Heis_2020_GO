@@ -56,3 +56,6 @@ If an order has been assigned to the local elevator, it is sent from the order d
 If an order has been executed, the fsm will send a boolean signal (true) to the message handler, and by that saying: "The orders on the current floor are executed". The order handler then removes all orders on the current floor from the order list.
 
 ### orderDistributer
+
+## Comunication between modules
+

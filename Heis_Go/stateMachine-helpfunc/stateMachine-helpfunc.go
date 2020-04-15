@@ -2,63 +2,63 @@
 package stateMachineHF
 
 import (
-	"../control-go"
+	"../elevator"
 	"../elevio"
 	"../orderHandler"
 	"../timer"
 )
 
-func ButtonPressedWhileIdle(elevator *control.Elev, firstButton elevio.ButtonEvent) {
+func ButtonPressedWhileIdle(elev *elevator.Elev, firstButton elevio.ButtonEvent) {
 	//Is the elevator on the floor that was ordered?
-	if firstButton.Floor == elevator.Floor{
-		stopOnFloor(elevator)
+	if firstButton.Floor == elev.Floor{
+		stopOnFloor(elev)
 		timer.StartTimer(timer.DoorOpenTime)
 
 	} else {
-		//direction := chooseDirectionIdle(elevator)
-		direction := chooseDirection(elevator)
+		//direction := chooseDirectionIdle(elev)
+		direction := chooseDirection(elev)
 		elevio.SetMotorDirection(direction)
-		control.UpdateElevatorValues (elevator, direction, control.Moving)
+		elevator.UpdateElevatorValues (elev, direction, elevator.Moving)
 	}
 }
 
 
-func ArrivedOnFloor(elevator *control.Elev) {
+func ArrivedOnFloor(elev *elevator.Elev) {
 	//Are there any orders this elevator should take at this floor?
-	if shouldIStop(elevator) {
+	if shouldIStop(elev) {
 		//Stopping, opens door and waits
-		stopOnFloor(elevator)
+		stopOnFloor(elev)
 		timer.StartTimer(timer.DoorOpenTime)
 	}
 }
 
 
-func DoorTimeout(elevator *control.Elev) {
+func DoorTimeout(elev *elevator.Elev) {
 	elevio.SetDoorOpenLamp(false)
 
-	//direction := ChooseDirectionIdle(elevator)
-	direction := chooseDirection(elevator)
+	//direction := ChooseDirectionIdle(elev)
+	direction := chooseDirection(elev)
 	elevio.SetMotorDirection(direction)
 	switch direction {
 	case elevio.MD_Stop:
-		control.UpdateElevatorValues(elevator, direction, control.Idle)
+		elevator.UpdateElevatorValues(elev, direction, elevator.Idle)
 	default :
-		control.UpdateElevatorValues(elevator, direction, control.Moving)
+		elevator.UpdateElevatorValues(elev, direction, elevator.Moving)
 	}
 
 
 }
 
 
-func chooseDirection(elevator *control.Elev) elevio.MotorDirection {
+func chooseDirection(elev *elevator.Elev) elevio.MotorDirection {
 	//Deciding where the elevator should go next based on the previous direction
-	switch elevator.PrevDirection {
+	switch elev.PrevDirection {
 	case elevio.MD_Up:
 		//Are there any orders above?
-		if orderHandler.OrdersAbove(elevator) {
+		if orderHandler.OrdersAbove(elev) {
 			return elevio.MD_Up
 		//Are there any order below?
-		} else if orderHandler.OrdersBelow(elevator) {
+		} else if orderHandler.OrdersBelow(elev) {
 			return elevio.MD_Down
 		//If not, then stand still
 		} else {
@@ -67,10 +67,10 @@ func chooseDirection(elevator *control.Elev) elevio.MotorDirection {
 
 	case elevio.MD_Down:
 		//Are there any order below?
-		if orderHandler.OrdersBelow(elevator) {
+		if orderHandler.OrdersBelow(elev) {
 			return elevio.MD_Down
 		//Are there any orders above?
-		} else if orderHandler.OrdersAbove(elevator) {
+		} else if orderHandler.OrdersAbove(elev) {
 			return elevio.MD_Up
 		//If not, then stand still
 		} else {
@@ -78,9 +78,9 @@ func chooseDirection(elevator *control.Elev) elevio.MotorDirection {
 		}
 
 	case elevio.MD_Stop:
-		if orderHandler.OrdersAbove(elevator) {
+		if orderHandler.OrdersAbove(elev) {
 			return elevio.MD_Up
-		} else if orderHandler.OrdersBelow(elevator){
+		} else if orderHandler.OrdersBelow(elev){
 			return elevio.MD_Down
 		}
 	}
@@ -88,14 +88,14 @@ func chooseDirection(elevator *control.Elev) elevio.MotorDirection {
 }
 
 
-func shouldIStop(elevator *control.Elev) bool {
-	switch elevator.CurrDirection {
+func shouldIStop(elev *elevator.Elev) bool {
+	switch elev.CurrDirection {
 
 	case elevio.MD_Up:
-		return  isOrderOnFloor(elevator) || !orderHandler.OrdersAbove(elevator)
+		return  isOrderOnFloor(elev) || !orderHandler.OrdersAbove(elev)
 
 	case elevio.MD_Down:
-		return isOrderOnFloor(elevator)|| !orderHandler.OrdersBelow(elevator)
+		return isOrderOnFloor(elev)|| !orderHandler.OrdersBelow(elev)
 
 	case elevio.MD_Stop:
 
@@ -105,23 +105,23 @@ func shouldIStop(elevator *control.Elev) bool {
 }
 
 
-func isOrderOnFloor(elevator *control.Elev) bool {
-	if elevator.CurrDirection == elevio.MD_Up {
-		return elevator.OrderList[elevator.Floor][elevio.BT_HallUp] == 1 ||
-			elevator.OrderList[elevator.Floor][elevio.BT_Cab] == 1
+func isOrderOnFloor(elev *elevator.Elev) bool {
+	if elev.CurrDirection == elevio.MD_Up {
+		return elev.OrderList[elev.Floor][elevio.BT_HallUp] == 1 ||
+			elev.OrderList[elev.Floor][elevio.BT_Cab] == 1
 
-	} else if elevator.CurrDirection == elevio.MD_Down {
-		return elevator.OrderList[elevator.Floor][elevio.BT_HallDown] == 1 ||
-			elevator.OrderList[elevator.Floor][elevio.BT_Cab] == 1
+	} else if elev.CurrDirection == elevio.MD_Down {
+		return elev.OrderList[elev.Floor][elevio.BT_HallDown] == 1 ||
+			elev.OrderList[elev.Floor][elevio.BT_Cab] == 1
 	} else {
 		return false
 	}
 }
 
 
-func stopOnFloor(elevator *control.Elev) {
+func stopOnFloor(elev *elevator.Elev) {
 	elevio.SetMotorDirection(elevio.MD_Stop)
 	elevio.SetDoorOpenLamp(true)
 
-	control.UpdateElevatorValues(elevator, elevio.MD_Stop, control.DoorOpen)
+	elevator.UpdateElevatorValues(elev, elevio.MD_Stop, elevator.DoorOpen)
 }

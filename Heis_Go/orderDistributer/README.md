@@ -6,6 +6,18 @@ Note: this module has a help-function module containing lower-level help functio
 ## Module description:
 The order distributer is in charge of distributing orders that are registered locally, as well as handling orders that has been distributed by other elevators.
 
+Whenever the order handler receives a hall order from the fsm, it is sent directly to the order distributer. Here, the order is assigned to one of the elevators in our system, using the cost function "*BestChoice*" seen in orderDistributer-helpfunc. This function iterates through the elevators we are connected with, and checks who is best fitted to execute the order. This is done utilizing a cost function.
+
+When an owner of the order is found, we send a message to the network module, for it to broadcast. This message is of type ExtOrder, which is a struct declared in orderDistributer-helpfunc. It is on the following form:
+
+```
+type ExtOrder struct {
+  Id string
+  Floor int
+  Button elevio.ButtonType
+}
+```
+
 To be able to do this, this module must have information about the status of the other elevators and which orders that are already being executed. To keep track of this information we have made three lists, that can be found in the help-function module. These are:
 
 **ELEVATOR_STATUS_LIST:**

@@ -13,7 +13,7 @@ type ExtOrder struct {
   Button elevio.ButtonType
 }
 
-const TIMOUT_LIMIT = 30
+const TIMOUT_LIMIT = 40
 
 const N_ELEVATORS = 3
 const TRAVEL_TIME = 2
@@ -143,10 +143,13 @@ func SetOrderActive(order elevio.ButtonEvent, active bool){
   if active{
     ACTIVE_ORDERS[order.Floor][order.Button] = 1
     TIMER_ACTIVE_ORDERS[order.Floor][order.Button] = time.Now().Unix()
+    elevio.SetButtonLamp(order.Button, order.Floor, true)
   } else{
     ACTIVE_ORDERS[order.Floor][order.Button] = 0
     TIMER_ACTIVE_ORDERS[order.Floor][order.Button] = 0
+    elevio.SetButtonLamp(order.Button, order.Floor, false)
   }
+
 }
 
 func RemoveOrdersOnFloor(floor int) {
@@ -154,6 +157,8 @@ func RemoveOrdersOnFloor(floor int) {
     ACTIVE_ORDERS[floor][index] = 0
     TIMER_ACTIVE_ORDERS[floor][index] = 0
   }
+  elevio.SetButtonLamp(elevio.BT_HallUp, floor, false)
+  elevio.SetButtonLamp(elevio.BT_HallDown, floor, false)
 }
 
 //convert from type internalOrder (elevio.ButtonEvent) to type ExtOrder

@@ -45,6 +45,12 @@ func IntToButtonType(i int) ButtonType{
 	return BT_HallUp
 }
 
+func CreateButtonEvent(floor int, button ButtonType) ButtonEvent {
+	var buttonEvent ButtonEvent
+	buttonEvent.Floor = floor
+	buttonEvent.Button = button
+	return buttonEvent
+}
 
 func Init(addr string, numFloors int) {
 	if _initialized {

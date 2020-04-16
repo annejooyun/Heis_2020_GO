@@ -77,8 +77,9 @@ func main(){
 
     go orderDistributer.PollStatusUpdates(ch_int_stat_update, ch_ext_stat_update, ch_bcast_stat_update)
 
-    go orderDistributer.DistributeOrders(ch_order_to_distribute, ch_rec_ext_order, ch_order_to_exec, ch_bcast_order, ch_order_timeout)
+    go orderDistributer.DistributeOrders(ch_order_to_distribute, ch_order_to_exec, ch_bcast_order, ch_order_timeout)
 
+    go orderDistributer.ReceiveOrders(ch_rec_ext_order, ch_order_to_exec)
 
     //go orderDistributer.NewDistributeOrders(&elev,ch_order_registered, ch_new_order, ch_rec_ext_order, ch_bcast_order, ch_order_timeout)
 

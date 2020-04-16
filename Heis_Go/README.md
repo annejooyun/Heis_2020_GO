@@ -166,4 +166,13 @@ Usage:
 
 Broadcast order executed
 
+Channel for broadcasting that all orders are executed at a specific floor. Whenever an order has been executed, the order distributer sends a message to the networks module, saying which floor the orders was executed at. The network module then broadcasts the message to a unique order-executed-port (see network). The message descirbed is sent via this channel.
 
+#### ch_rec_order_exec
+Type: Int
+
+Usage:
+
+Receive order executed
+
+Whenever the network module detects that a message has been broadcasted to the order-executed-port (see network), the message is sent directly to the order distributer, using this channel.

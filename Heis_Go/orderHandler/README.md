@@ -11,3 +11,5 @@ If an order has been assigned to the local elevator, it is sent from the order d
 If an order has been executed, the fsm will send a boolean signal (true) to the message handler, and by that saying: "The orders on the current floor are executed". The order handler then removes all orders on the current floor from the order list.
 
 This module has the main functions "*DistributeInternalOrders*" and "*RegisterExecutedOrders*", which, as the name implies, distributes all internal orders, and register if an order has been executed.
+
+Help-functions can be found in the file orderHanlder-helpfunc

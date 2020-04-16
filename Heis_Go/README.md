@@ -61,7 +61,10 @@ The order distributer must now both register that an order is executed. This is 
 Each time the network module detects that a message has been broadcasted to the order-executed-port, a message on the form (floor (int)) is sent to the order distributer, where the orders at the corresponding floor are removed from the list of active orders.
 
 ### Communication overview
+
 The following figure shows an overview of the most important communication channels between the five main modules:
+
+
 ![Alt text](overview_channels.png)
 
 ### Channel descriptions

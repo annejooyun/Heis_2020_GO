@@ -17,10 +17,18 @@ Type: ExtOrder (see orderDistributer module)
 
 Port: 20203
 
-All orders are broadcasted to the port stated. This port is unique and only used for order messages. The network module broadcasts all order-messages sent to the channel ch_bcast_order. All order-messages that are broadcasted to the port stated, are sent to the channel ch_rec_ext_order.
+All orders are broadcasted to the port stated. This port is unique and only used for order-messages. The network module broadcasts all order-messages sent to the channel ch_bcast_order. All order-messages that are broadcasted to the port stated, are sent to the channel ch_rec_ext_order.
 
 ### Order Updates
 Type: int
 
 Port: 20194
 
+All order updates are broadcasted to the port stated. This port is unique and only used for order updates. In this project, an order update states at which floor an order has been executed. Whenever an order has been executed at a floor, corresponding int is sent to the network module via the channel ch_bcast_order_exec. All order updates sent to this channel are directly broadcasted to the port stated.
+
+All messages sent to the port stated, are directly sent to the order distributer via the channel chan_rec_order_exec.
+
+
+
+
+For more specific information, see the readme in network-helpfunc.

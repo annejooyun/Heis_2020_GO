@@ -5,13 +5,13 @@ import (
 	"../elevator"
 	"../elevio"
 	"../timer"
-	"fmt"
+	//"fmt"
 	//"../messageHandler"
 	)
 
 
 
-func RunStateMachine(elev *elevator.Elev, send_to_order_handler chan elevio.ButtonEvent, new_order chan elevio.ButtonEvent, status_updated chan bool, order_executed chan bool) {
+func RunStateMachine(elev *elevator.Elev, order_registered chan elevio.ButtonEvent, new_order chan elevio.ButtonEvent, status_updated chan bool, order_executed chan bool) {
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors  := make(chan int)
 	//drv_obstr   := make(chan bool)
@@ -33,12 +33,12 @@ func RunStateMachine(elev *elevator.Elev, send_to_order_handler chan elevio.Butt
 
 
         case buttonPressed := <- drv_buttons:
-					send_to_order_handler <- buttonPressed
+						order_registered <- buttonPressed
 
 
 				case floor := <- drv_floors: //A new floor is detected
-						fmt.Printf("Floor detected:\n")
-						fmt.Printf("%+v\n", floor)
+						//fmt.Printf("Floor detected:\n")
+						//fmt.Printf("%+v\n", floor)
             prevFloor := elev.Floor //Store the previous floor we were on
             elevator.UpdateFloor(elev, floor) //Update the current floor to the floor detected.
             elevio.SetFloorIndicator(floor)
@@ -50,9 +50,9 @@ func RunStateMachine(elev *elevator.Elev, send_to_order_handler chan elevio.Butt
 						status_updated <- true
 
 
-	        case timeOut := <- ch_timer:
-	          fmt.Printf("TIMEOUT = ")
-	          fmt.Printf("%+v\n", timeOut)
+	        case <- ch_timer:
+	          //fmt.Printf("TIMEOUT = ")
+	          //fmt.Printf("%+v\n", timeOut)
 	          stateMachineHF.DoorTimeout(elev)
 						order_executed <- true
 						status_updated <- true //There may have been a change in status

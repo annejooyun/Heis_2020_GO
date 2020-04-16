@@ -3,7 +3,7 @@ package orderDistributerHF
 import(
   "../elevator"
   "../elevio"
-
+  "time"
   "fmt"
 )
 
@@ -12,6 +12,8 @@ type ExtOrder struct {
   Floor int
   Button elevio.ButtonType
 }
+
+const TIMOUT_LIMIT = 30
 
 const N_ELEVATORS = 3
 const TRAVEL_TIME = 2
@@ -23,17 +25,17 @@ var ADDED_ELEVATORS [N_ELEVATORS] string //Contains the Id's of added elevators
 
 var ACTIVE_ORDERS [elevator.N_FLOORS][2] int //If an order is beeing executed the element is set to 1
 
+var TIMER_ACTIVE_ORDERS [elevator.N_FLOORS][2] int64 //List of timestamps for orders
 
-
-func UpdateElevatorStatusList(ADDED_ELEVATORS [3] string, ELEVATOR_STATUS_LIST [3] elevator.Elev, elevator_status elevator.Elev) {
+func UpdateElevatorStatusList(elevator_status elevator.Elev) {
   for index,element := range(ADDED_ELEVATORS) { //The elevators have the same order in both lists
     if element == "" || element == elevator_status.Id {
       ADDED_ELEVATORS[index] = elevator_status.Id
       ELEVATOR_STATUS_LIST[index] = elevator_status
 
       //Printout to check what happens
-      fmt.Printf("Status updated for %s\n", elevator_status.Id)
-      fmt.Printf("The elevator list now contains the following elevators: %v\n",ADDED_ELEVATORS)
+      //fmt.Printf("Status updated for %s\n", elevator_status.Id)
+      //fmt.Printf("The elevator list now contains the following elevators: %v\n",ADDED_ELEVATORS)
       break
     }
   }
@@ -140,11 +142,19 @@ func AlreadyActiveOrder(order elevio.ButtonEvent) bool {
 func SetOrderActive(order elevio.ButtonEvent, active bool){
   if active{
     ACTIVE_ORDERS[order.Floor][order.Button] = 1
+    TIMER_ACTIVE_ORDERS[order.Floor][order.Button] = time.Now().Unix()
   } else{
     ACTIVE_ORDERS[order.Floor][order.Button] = 0
+    TIMER_ACTIVE_ORDERS[order.Floor][order.Button] = 0
   }
 }
 
+func RemoveOrdersOnFloor(floor int) {
+  for index,_ := range ACTIVE_ORDERS[floor] {
+    ACTIVE_ORDERS[floor][index] = 0
+    TIMER_ACTIVE_ORDERS[floor][index] = 0
+  }
+}
 
 //convert from type internalOrder (elevio.ButtonEvent) to type ExtOrder
 func ConvertToExternalOrder(order elevio.ButtonEvent, owner string) ExtOrder{
@@ -163,11 +173,4 @@ func ConvertToInternalOrder(order ExtOrder) elevio.ButtonEvent {
   internalOrder.Button = order.Button
 
   return internalOrder
-}
-
-
-func RemoveOrdersOnFloor(floor int) {
-  for index,_ := range ACTIVE_ORDERS[floor] {
-    ACTIVE_ORDERS[floor][index] = 0
-  }
 }

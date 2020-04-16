@@ -73,29 +73,29 @@ func UpdateElevatorValues(elevator *Elev, direction elevio.MotorDirection, state
 
 func UpdateCurrState(elevator *Elev, state State){
   elevator.CurrState = state
-  fmt.Println("New CurrState")
-  fmt.Printf("%+v\n", elevator.CurrState)
+  //fmt.Println("New CurrState")
+  //fmt.Printf("%+v\n", elevator.CurrState)
 }
 
 
 func UpdatePrevState(elevator *Elev){
   elevator.PrevState = elevator.CurrState
-  fmt.Println("New PrevState")
-  fmt.Printf("%+v\n", elevator.PrevState)
+  //fmt.Println("New PrevState")
+  //fmt.Printf("%+v\n", elevator.PrevState)
 }
 
 
 func UpdateCurrDirection(elevator *Elev, direction elevio.MotorDirection) {
   elevator.CurrDirection = direction
-  fmt.Println("New CurrDirection")
-  fmt.Printf("%+v\n", elevator.CurrDirection)
+  //fmt.Println("New CurrDirection")
+  //fmt.Printf("%+v\n", elevator.CurrDirection)
 }
 
 
 func UpdatePrevDirection(elevator *Elev) {
   elevator.PrevDirection = elevator.CurrDirection
-  fmt.Println("New PrevDirection")
-  fmt.Printf("%+v\n", elevator.PrevDirection)
+  //fmt.Println("New PrevDirection")
+  //fmt.Printf("%+v\n", elevator.PrevDirection)
 }
 
 

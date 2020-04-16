@@ -8,9 +8,9 @@ import (
 	"../timer"
 )
 
-func ButtonPressedWhileIdle(elev *elevator.Elev, firstButton elevio.ButtonEvent) {
+func ButtonPressedWhileIdle(elev *elevator.Elev, pressedButton elevio.ButtonEvent) {
 	//Is the elevator on the floor that was ordered?
-	if firstButton.Floor == elev.Floor{
+	if pressedButton.Floor == elev.Floor{
 		stopOnFloor(elev)
 		timer.StartTimer(timer.DoorOpenTime)
 

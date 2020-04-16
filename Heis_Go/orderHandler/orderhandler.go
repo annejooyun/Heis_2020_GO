@@ -3,7 +3,7 @@ package orderHandler
 import (
   "../elevator"
   "../elevio"
-  "fmt"
+  //"fmt"
 )
 
 
@@ -51,15 +51,15 @@ func ClearOrdersAtCurrentFloor(elev *elevator.Elev) {
   elevio.SetButtonLamp(elevio.BT_Cab, elev.Floor, false)
   elevio.SetButtonLamp(elevio.BT_HallUp, elev.Floor, false)
   elevio.SetButtonLamp(elevio.BT_HallDown, elev.Floor, false)
-  fmt.Printf("%+v\n", elev.OrderList)
+  //fmt.Printf("%+v\n", elev.OrderList)
 }
 
 
-func takeOrder(elev *elevator.Elev, order elevio.ButtonEvent) {
+func TakeOrder(elev *elevator.Elev, order elevio.ButtonEvent) {
   addOrder(elev, order)
 
-  fmt.Printf("%+v\n", elev.OrderList)
-  fmt.Printf("%+v\n", elev.CurrState)
+  //fmt.Printf("%+v\n", elev.OrderList)
+  //fmt.Printf("%+v\n", elev.CurrState)
 
   elevio.SetButtonLamp(order.Button,order.Floor, true)
 }
@@ -67,28 +67,31 @@ func takeOrder(elev *elevator.Elev, order elevio.ButtonEvent) {
 
 ///HEI FIKS DENNE DET ER FOR MANGE INPUTSS
 
-func StartOrderHandling(elev *elevator.Elev, order_from_fsm chan elevio.ButtonEvent, order_from_order_distributer chan elevio.ButtonEvent, distribute_order chan elevio.ButtonEvent, new_order chan elevio.ButtonEvent, order_executed chan bool, bcast_order_executed_at_floor chan []int, orders_executed chan []int) {
+func DistributeInternalOrders(elev *elevator.Elev, order_from_fsm chan elevio.ButtonEvent, order_from_order_distributer chan elevio.ButtonEvent, distribute_order chan elevio.ButtonEvent, new_order chan elevio.ButtonEvent) {
   for {
     select {
     case order := <- order_from_fsm:
       if order.Button == elevio.BT_Cab {
-        takeOrder(elev,order)
+        TakeOrder(elev,order)
         new_order <- order
       } else {
         distribute_order <- order
       }
 
     case order := <- order_from_order_distributer:
-      takeOrder(elev, order)
+      TakeOrder(elev, order)
       new_order <- order
+    }
+  }
+}
 
+
+func RegisterExecutedOrders(elev *elevator.Elev, order_executed chan bool, internal_order_executed chan int){
+  for {
+    select {
     case <- order_executed:
       //create list of orders executed on the form [button up, button down, floor]
-      ordersExecuted := []int{elev.OrderList[elev.Floor][0],elev.OrderList[elev.Floor][1]}
-      ordersExecuted = append(ordersExecuted, elev.Floor)
-
-      bcast_order_executed_at_floor <- ordersExecuted
-      orders_executed<- ordersExecuted
+      internal_order_executed <- elev.Floor
 
       ClearOrdersAtCurrentFloor(elev)
     }

@@ -33,6 +33,18 @@ type ButtonEvent struct {
 	Button ButtonType
 }
 
+func IntToButtonType(i int) ButtonType{
+	switch i {
+	case 0:
+		return BT_HallUp
+	case 1:
+		return BT_HallDown
+	case 2:
+		return BT_Cab
+	}
+	return BT_HallUp
+}
+
 
 func Init(addr string, numFloors int) {
 	if _initialized {

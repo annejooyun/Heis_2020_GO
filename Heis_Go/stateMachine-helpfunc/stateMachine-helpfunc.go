@@ -4,8 +4,8 @@ package stateMachineHF
 import (
 	"../elevator"
 	"../elevio"
-	"../orderHandler"
 	"../timer"
+	"../orderHandler-helpfunc"
 )
 
 func ButtonPressedWhileIdle(elev *elevator.Elev, pressedButton elevio.ButtonEvent) {
@@ -55,10 +55,10 @@ func chooseDirection(elev *elevator.Elev) elevio.MotorDirection {
 	switch elev.PrevDirection {
 	case elevio.MD_Up:
 		//Are there any orders above?
-		if orderHandler.OrdersAbove(elev) {
+		if orderHandlerHF.OrdersAbove(elev) {
 			return elevio.MD_Up
 		//Are there any order below?
-		} else if orderHandler.OrdersBelow(elev) {
+		} else if orderHandlerHF.OrdersBelow(elev) {
 			return elevio.MD_Down
 		//If not, then stand still
 		} else {
@@ -67,10 +67,10 @@ func chooseDirection(elev *elevator.Elev) elevio.MotorDirection {
 
 	case elevio.MD_Down:
 		//Are there any order below?
-		if orderHandler.OrdersBelow(elev) {
+		if orderHandlerHF.OrdersBelow(elev) {
 			return elevio.MD_Down
 		//Are there any orders above?
-		} else if orderHandler.OrdersAbove(elev) {
+		} else if orderHandlerHF.OrdersAbove(elev) {
 			return elevio.MD_Up
 		//If not, then stand still
 		} else {
@@ -78,9 +78,9 @@ func chooseDirection(elev *elevator.Elev) elevio.MotorDirection {
 		}
 
 	case elevio.MD_Stop:
-		if orderHandler.OrdersAbove(elev) {
+		if orderHandlerHF.OrdersAbove(elev) {
 			return elevio.MD_Up
-		} else if orderHandler.OrdersBelow(elev){
+		} else if orderHandlerHF.OrdersBelow(elev){
 			return elevio.MD_Down
 		}
 	}
@@ -92,10 +92,10 @@ func shouldIStop(elev *elevator.Elev) bool {
 	switch elev.CurrDirection {
 
 	case elevio.MD_Up:
-		return  isOrderOnFloor(elev) || !orderHandler.OrdersAbove(elev)
+		return  isOrderOnFloor(elev) || !orderHandlerHF.OrdersAbove(elev)
 
 	case elevio.MD_Down:
-		return isOrderOnFloor(elev)|| !orderHandler.OrdersBelow(elev)
+		return isOrderOnFloor(elev)|| !orderHandlerHF.OrdersBelow(elev)
 
 	case elevio.MD_Stop:
 

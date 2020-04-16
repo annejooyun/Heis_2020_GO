@@ -65,17 +65,21 @@ The following figure shows an overview of the most important communication chann
 ![Alt text](overview_channels.png)
 
 ### Channel descriptions
-#### ch_order_registered:
+#### ch_order_reg:
 Type: ButtonEvent
 
 Usage:
 
+Order registered
+
 Whenever the FSM registeres that a button has been pushed, the order (ButtonEvent) corresponding to the pushed button is sent to the Order Handler using the channel ch_order_registered.
 
-#### ch_order_executed:
+#### ch_order_exec:
 Type: Bool
 
 Usage:
+
+Order executed
 
 Whenever the elevator stops on a floor, one or more orders are executed. The FSM then sends a True over the channel ch_order_executed, to the order handler, indicating that all orders on the floor the elevator is currently at, has been executed.
 
@@ -84,17 +88,21 @@ Type: Bool
 
 Usage:
 
-#### ch_internal_status_update
+#### ch_int_stat_update
 Type: Elev
 
 Usage:
 
+Internal status update
+
 Whenever the Elevator object module is informed that the status has been changed, a copy of the elevator object is sent to the order distributer over the channel ch_internal_status_update
 
-#### ch_order_to_execute
+#### ch_order_to_exec
 Type: ButtonEvent
 
 Usage:
+
+Order to execute
 
 If the order distributer distributes an order to the local elevator, it is sent to the order handler via the channel ch_order_to_execute
 
@@ -105,12 +113,57 @@ Usage:
 
 All hall-orders that the order handler receives from the fsm must be sent to the order distributer, to be distributed. Thus, all hall-orders from the FSM is sent to the order distributer via the channel ch_order_to_distribute.
 
-#### ch_internal_order_executed
-Type: Int[]
-
-Format: [floor (int), Button Hall Up (1/0), Button Hall Down (1/0)]
+#### ch_int_order_exec
+Type: Int
 
 Usage:
 
-When an order is executed at a floor, all orders registered at that floor in the order handler are executed. The order distributer must be informed of which orders the elevator has executed, to be able to 
+Internal order executed
+
+When an internal order is executed at a floor, all orders at that floor are executed. Whenever an order is executed, the floor of which order has been executed at is sent from the order handler to the order distributer.
+
+#### ch_bcast_stat
+Type: Elev
+
+Usage:
+
+Broadcast status
+
+Channel for sending internal status update to the network module, so that it is distributed.
+
+#### ch_rec_stat
+Type: Elev
+
+Usage:
+
+Receive status
+
+Channel for receiving status updates broadcasted by other elevators. The status update is sent to the order distributer, so that the status lists can be updated.
+
+#### ch_bcast_order
+Type: ExternalOrder
+
+Usage:
+
+Broadcast order
+
+Channel for broadcasting orders that are distributed by the local order distributer.
+
+
+#### ch_rec_order
+Type: ExternalOrder
+
+Usage:
+
+Receive order
+
+Channel for receiving orders that are broadcasted to the order-port (see network). All orders broadcasted to this port is sent to the order distributer using this channel.
+
+#### ch_bcast_order_exec
+Type: Int
+
+Usage:
+
+Broadcast order executed
+
 

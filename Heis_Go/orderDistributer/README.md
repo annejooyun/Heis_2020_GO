@@ -18,7 +18,11 @@ type ExtOrder struct {
 }
 ```
 
-To be able to do this, this module must have information about the status of the other elevators and which orders that are already being executed. To keep track of this information we have made three lists, that can be found in the help-function module. These are:
+Whenever a message is broadcasted by any elevator, it is detected by the network module, which sends the message to the order distributer. If the owner ID of the order is the local ID, which means that I am to execute the order, the order is converted from an external order (ExtOrder) to an internal order (ButtonEvent), and is sent to the order handler.
+
+
+
+To be able to do all this, this module must have information about the status of the other elevators and which orders that are already being executed. To keep track of this information we have made three lists, that can be found in the help-function module. These are:
 
 **ELEVATOR_STATUS_LIST:**
 
@@ -47,3 +51,6 @@ Each time the status of an elevator changes, a copy of the local elevator object
 When a status update is registered by the network module, it is sent to the order distributer. Then the status update is added to the two lists as described above.
 
 ### Keeping track on active orders
+Each time an order
+
+## Fault tolerance

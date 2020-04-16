@@ -23,8 +23,12 @@ The software uses a “momentary master” procedure, where all elevators has th
 
 To make sure the system is fault-tolerant, all elevators has a list of timestamps, that are activated/deactivated whenever an order is assigned/executed. If an elevator detects that the time since a timestamp exceeds a certain amount, the corresponding order is taken by the local elevator. In that way, we make sure that all orders are taken, however, we may observe that some orders are taken by several elevators. 
 
+This system consists offive main modules, each with its own responsibilities. These are: FSM, Elevator, Order Handler, Order Distributer and Network. You can read more about each module in their own readme files.
+
 ## Communication sequences
-### Status update
+The communication between the modules are mainly done by sending messages over channels. In this system there are three main sequences of messaging, and they consern: status updates, registered orders and executed orders.
+
+### Status updates
 For the system to be able to correctly distribute orders, all elevators must know the status of all other elevators. The relevant information is each elevators current position, current direction and their order list.
 
 To be able to seperate the elevators, all elevators has a unique ID. That ID is the same as the TCP port used to communicate with the elevator server.

@@ -13,11 +13,13 @@ type ExtOrder struct {
   Button elevio.ButtonType
 }
 
-const TIMOUT_LIMIT = 40
+
+const TIMEOUT_LIMIT = 40
 
 const N_ELEVATORS = 3
 const TRAVEL_TIME = 2
 const DOOR_OPEN_TIME = 3
+
 
 var ELEVATOR_STATUS_LIST [N_ELEVATORS] elevator.Elev //Contains the previous registered states of all connected elevators
 var ADDED_ELEVATORS [N_ELEVATORS] string //Contains the Id's of added elevators
@@ -26,6 +28,76 @@ var ADDED_ELEVATORS [N_ELEVATORS] string //Contains the Id's of added elevators
 var ACTIVE_ORDERS [elevator.N_FLOORS][2] int //If an order is beeing executed the element is set to 1
 
 var TIMER_ACTIVE_ORDERS [elevator.N_FLOORS][2] int64 //List of timestamps for orders
+
+
+//---------------------------------------------------------------------------------------------------------------------------//
+
+
+
+//Finds the best elevator to execute an order
+func BestChoice(order elevio.ButtonEvent) string {
+  best_choice := ""
+  best_cost  := 10000
+  for index,element := range(ELEVATOR_STATUS_LIST) {
+    if ADDED_ELEVATORS[index] == "" {
+      break
+    } else if simpleCostFunction(element, order) < best_cost {
+      best_cost = simpleCostFunction(element,order)
+      best_choice = element.Id
+    }
+  }
+  fmt.Printf("Best cost: %d\n",best_cost)
+  return best_choice
+}
+
+
+func AlreadyActiveOrder(order elevio.ButtonEvent) bool {
+  return ACTIVE_ORDERS[order.Floor][order.Button] == 1
+}
+
+
+func SetOrderActive(order elevio.ButtonEvent, active bool){
+  if active{
+    ACTIVE_ORDERS[order.Floor][order.Button] = 1
+    TIMER_ACTIVE_ORDERS[order.Floor][order.Button] = time.Now().Unix()
+    elevio.SetButtonLamp(order.Button, order.Floor, true)
+  } else{
+    ACTIVE_ORDERS[order.Floor][order.Button] = 0
+    TIMER_ACTIVE_ORDERS[order.Floor][order.Button] = 0
+    elevio.SetButtonLamp(order.Button, order.Floor, false)
+  }
+}
+
+
+func RemoveOrdersOnFloor(floor int) {
+  for index,_ := range ACTIVE_ORDERS[floor] {
+    ACTIVE_ORDERS[floor][index] = 0
+    TIMER_ACTIVE_ORDERS[floor][index] = 0
+  }
+  elevio.SetButtonLamp(elevio.BT_HallUp, floor, false)
+  elevio.SetButtonLamp(elevio.BT_HallDown, floor, false)
+}
+
+
+//convert from type internalOrder (elevio.ButtonEvent) to type ExtOrder
+func ConvertToExternalOrder(order elevio.ButtonEvent, owner string) ExtOrder{
+  var externalOrder ExtOrder
+  externalOrder.Id = owner
+  externalOrder.Floor = order.Floor
+  externalOrder.Button = order.Button
+  return externalOrder
+}
+
+
+//Convert from type ExtOrder to internalOrder (elevio.ButtonEvent)
+func ConvertToInternalOrder(order ExtOrder) elevio.ButtonEvent {
+  var internalOrder elevio.ButtonEvent
+  internalOrder.Floor = order.Floor
+  internalOrder.Button = order.Button
+
+  return internalOrder
+}
+
 
 func UpdateElevatorStatusList(elevator_status elevator.Elev) {
   for index,element := range(ADDED_ELEVATORS) { //The elevators have the same order in both lists
@@ -40,6 +112,9 @@ func UpdateElevatorStatusList(elevator_status elevator.Elev) {
     }
   }
 }
+
+
+//---------------------------------------------------------------------------------------------------------------------------//
 
 
 //Finds the absolute value of an int
@@ -117,65 +192,13 @@ func simpleCostFunction(elev elevator.Elev, order elevio.ButtonEvent) int {
 }
 
 
-//Finds the best elevator to execute an order
-func BestChoice(order elevio.ButtonEvent) string {
-  best_choice := ""
-  best_cost  := 10000
-  for index,element := range(ELEVATOR_STATUS_LIST) {
-    if ADDED_ELEVATORS[index] == "" {
-      break
-    } else if simpleCostFunction(element, order) < best_cost {
-      best_cost = simpleCostFunction(element,order)
-      best_choice = element.Id
-    }
+//Checks if timeout has happened
+func IsOrderTimeout(timestamp int64) bool {
+  var currTime int64
+  currTime = time.Now().Unix()
+  if timestamp != 0 && timestamp + TIMEOUT_LIMIT < currTime{
+    return true
+  }else{
+    return false
   }
-  fmt.Printf("Best cost: %d\n",best_cost)
-  return best_choice
-}
-
-
-func AlreadyActiveOrder(order elevio.ButtonEvent) bool {
-  return ACTIVE_ORDERS[order.Floor][order.Button] == 1
-}
-
-
-func SetOrderActive(order elevio.ButtonEvent, active bool){
-  if active{
-    ACTIVE_ORDERS[order.Floor][order.Button] = 1
-    TIMER_ACTIVE_ORDERS[order.Floor][order.Button] = time.Now().Unix()
-    elevio.SetButtonLamp(order.Button, order.Floor, true)
-  } else{
-    ACTIVE_ORDERS[order.Floor][order.Button] = 0
-    TIMER_ACTIVE_ORDERS[order.Floor][order.Button] = 0
-    elevio.SetButtonLamp(order.Button, order.Floor, false)
-  }
-
-}
-
-func RemoveOrdersOnFloor(floor int) {
-  for index,_ := range ACTIVE_ORDERS[floor] {
-    ACTIVE_ORDERS[floor][index] = 0
-    TIMER_ACTIVE_ORDERS[floor][index] = 0
-  }
-  elevio.SetButtonLamp(elevio.BT_HallUp, floor, false)
-  elevio.SetButtonLamp(elevio.BT_HallDown, floor, false)
-}
-
-//convert from type internalOrder (elevio.ButtonEvent) to type ExtOrder
-func ConvertToExternalOrder(order elevio.ButtonEvent, owner string) ExtOrder{
-  var externalOrder ExtOrder
-  externalOrder.Id = owner
-  externalOrder.Floor = order.Floor
-  externalOrder.Button = order.Button
-  return externalOrder
-}
-
-
-//Convert from type ExtOrder to internalOrder (elevio.ButtonEvent)
-func ConvertToInternalOrder(order ExtOrder) elevio.ButtonEvent {
-  var internalOrder elevio.ButtonEvent
-  internalOrder.Floor = order.Floor
-  internalOrder.Button = order.Button
-
-  return internalOrder
 }

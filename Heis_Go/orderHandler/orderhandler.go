@@ -13,7 +13,6 @@ func DistributeInternalOrders(elev *elevator.Elev,
                               distribute_order chan elevio.ButtonEvent,
                               new_order chan elevio.ButtonEvent) {
 
-
   for {
     select {
     case order := <- order_from_fsm:
@@ -33,6 +32,7 @@ func DistributeInternalOrders(elev *elevator.Elev,
 
 
 func RegisterExecutedOrders(elev *elevator.Elev, order_executed chan bool, internal_order_executed chan int){
+
   for {
     select {
     case <- order_executed:

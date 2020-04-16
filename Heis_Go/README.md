@@ -25,10 +25,11 @@ To make sure the system is fault-tolerant, all elevators has a list of timestamp
 
 This system consists offive main modules, each with its own responsibilities. These are: FSM, Elevator, Order Handler, Order Distributer and Network. You can read more about each module in their own readme files.
 
-## Communication sequences
+## Comunication between modules
+### Communication sequences
 The communication between the modules are mainly done by sending messages over channels. In this system there are three main sequences of messaging, and they consern: status updates, registered orders and executed orders.
 
-### Status updates
+#### Status updates
 For the system to be able to correctly distribute orders, all elevators must know the status of all other elevators. The relevant information is each elevators current position, current direction and their order list.
 
 To be able to seperate the elevators, all elevators has a unique ID. That ID is the same as the TCP port used to communicate with the elevator server.
@@ -39,7 +40,7 @@ The order distributer registers the status update correctly by placing the eleva
 
 All status updates are broadcasted to the same port (20000). The function StartSendingAndReceivingStatusUpdates starts two goroutines which at all time broadcasts all status updates sent on a specific channel, and sends all messages received on port 20000 on another. When a status update from another elevator has been received, the status lists are updated as described earlier.
 
-### Order registered
+#### Order registered
 An order is registered by an elevator in the form of a button push detected in the FSM. When a button is pushed, the corresponding order is sent to the order handler module. These orders are called "*internal orders*" and are on the form of an ButtonEvent (see elevio).
 
 The order handler module now has to decide what to do with the order. If the order is a cab order, it must be taken by the local elevator. The order is therefore inserted in the order list of the local elevator, and the communication sequence ends.
@@ -50,7 +51,7 @@ The order distributer now has to decide which elevator should operate the order.
 
 Whenever there has happend a broadcast to the order port, the network module sends the order to the order distributer. If the ID of the owner of the order is the same as the local ID, the order is converted back to an internal order, before it is sent to the order handler where it is placed in the order list of the local elevator.
 
-### Order executed
+#### Order executed
 To be able to make sure that all orders are executed, we must let the other elevators know each time we have completed an order. 
 
 In this project, we assume that if the elevators stop at a floor, all customers at that floor will board the elevator. Thus, each time elevator stops at a floor, we can assume that all orders at that floor are executed. Each time the FSM registeres that an order is executed at a floor, a boolean true is sent to the order handler saying: "all orders on the current floor are executed". The order handler then sends the current position (floor (int)) of the elevator to the order distributer.
@@ -59,32 +60,8 @@ The order distributer must now both register that an order is executed. This is 
 
 Each time the network module detects that a message has been broadcasted to the order-executed-port, a message on the form (floor (int)) is sent to the order distributer, where the orders at the corresponding floor are removed from the list of active orders.
 
-
-
-## Description of the modules:
-
-### stateMachine:
-The stateMachine module is in charge of running one elevator according to the description. It has four triggers: Button pushed, floor detected, order received and timeOut.
-
-Button pushed:
-
-When a button is pushed on the elevator, a message with the respective order is sent on the channel "orders_to_order_handler". The order handler then distributes the order to the right elevator.
-
-Floor detected:
-
-When the floor sensor detects a new floor, a message with the floor number is sent on the channel "drv_floors". The state machine then saves the previous floor in a variable and then updates the elevator object to contain the floor detected. The floor indicator light is also turned on on the floor detected.
-
-If we have arrived at a new floor we shall do the following:
-If we are meant to stop on the floor, we stop the elevator and executes the orders.
-Since we now are at a new floor, the elevator object has now changed, and we send a message on the status update channel.
-
-Order received:
-
-An order is received from the order handler on the channel "incoming_orders". We should then add the order to our execution list, and set the light in the correct order button. If we are in Idle, we should execute the order immediately.
-
-### orderDistributer
-
-## Comunication between modules
+### Communication overview
+The following figure shows an overview of the most important communication channels between the five main modules:
 ![Alt text](overview_channels.png)
 
 ### Channel descriptions
@@ -138,4 +115,31 @@ Usage:
 When an order is executed at a floor, all orders registered at that floor in the order handler are executed. The order distributer must be informed of which orders the elevator has executed, to be able to 
 
 
+
+
+
+
+
+## Description of the modules:
+
+### stateMachine:
+The stateMachine module is in charge of running one elevator according to the description. It has four triggers: Button pushed, floor detected, order received and timeOut.
+
+Button pushed:
+
+When a button is pushed on the elevator, a message with the respective order is sent on the channel "orders_to_order_handler". The order handler then distributes the order to the right elevator.
+
+Floor detected:
+
+When the floor sensor detects a new floor, a message with the floor number is sent on the channel "drv_floors". The state machine then saves the previous floor in a variable and then updates the elevator object to contain the floor detected. The floor indicator light is also turned on on the floor detected.
+
+If we have arrived at a new floor we shall do the following:
+If we are meant to stop on the floor, we stop the elevator and executes the orders.
+Since we now are at a new floor, the elevator object has now changed, and we send a message on the status update channel.
+
+Order received:
+
+An order is received from the order handler on the channel "incoming_orders". We should then add the order to our execution list, and set the light in the correct order button. If we are in Idle, we should execute the order immediately.
+
+### orderDistributer
 

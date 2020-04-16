@@ -5,8 +5,6 @@ Note: this module has a help-function module containing lower-level help functio
 ### Module description:
 The stateMachine module is in charge of running one elevator according to the description. It has four triggers: New order, Button pushed, Floor detected, and Time-out.
 
-**HEI PETTER. Jeg har gått over funksjonen RunStateMachine og gjort om på avsnittene dine. Kan du verifisere at det jeg har skrevet stemmer? Antar at det er andre navn i denne filen pga endringer som ikke har blitt registrert i README-fila**
-
 **New order/Order received:**
 
 An order is received from the orderHandler on the channel "incoming_orders". We should then add the order to our execution list, and set the light in the correct order button. If we are in Idle, we should execute the order immediately.

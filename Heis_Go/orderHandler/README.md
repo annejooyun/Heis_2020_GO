@@ -12,4 +12,4 @@ If an order has been executed, the fsm will send a boolean signal (true) to the 
 
 This module has the main functions "*DistributeInternalOrders*" and "*RegisterExecutedOrders*", which, as the name implies, distributes all internal orders, and register if an order has been executed.
 
-Help-functions can be found in the file orderHanlder-helpfunc
+Help-functions can be found in the file orderHanlder-helpfunc.

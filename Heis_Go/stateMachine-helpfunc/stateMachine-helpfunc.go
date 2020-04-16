@@ -18,7 +18,7 @@ func ButtonPressedWhileIdle(elev *elevator.Elev, pressedButton elevio.ButtonEven
 		//direction := chooseDirectionIdle(elev)
 		direction := chooseDirection(elev)
 		elevio.SetMotorDirection(direction)
-		elevator.UpdateElevatorValues (elev, direction, elevator.Moving)
+		elevator.UpdateElevatorDirectionsAndStates (elev, direction, elevator.Moving)
 	}
 }
 
@@ -41,9 +41,9 @@ func DoorTimeout(elev *elevator.Elev) {
 	elevio.SetMotorDirection(direction)
 	switch direction {
 	case elevio.MD_Stop:
-		elevator.UpdateElevatorValues(elev, direction, elevator.Idle)
+		elevator.UpdateElevatorDirectionsAndStates(elev, direction, elevator.Idle)
 	default :
-		elevator.UpdateElevatorValues(elev, direction, elevator.Moving)
+		elevator.UpdateElevatorDirectionsAndStates(elev, direction, elevator.Moving)
 	}
 
 
@@ -123,5 +123,5 @@ func stopOnFloor(elev *elevator.Elev) {
 	elevio.SetMotorDirection(elevio.MD_Stop)
 	elevio.SetDoorOpenLamp(true)
 
-	elevator.UpdateElevatorValues(elev, elevio.MD_Stop, elevator.DoorOpen)
+	elevator.UpdateElevatorDirectionsAndStates(elev, elevio.MD_Stop, elevator.DoorOpen)
 }

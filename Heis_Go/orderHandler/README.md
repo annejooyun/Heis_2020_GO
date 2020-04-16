@@ -1,5 +1,7 @@
-# Module description - Order Handler
+# Order Handler
+Note: this module has a help-function module containing lower-level help functions. This is done to try and improve qode quality.
 
+## Module description
 The orderHandler module distributes all orders created by, or assigned to the local elevator. It also manages the list of orders in the local elevator (which exists in the elevator object, see module elevator).
 
 Whenever a button is pushed on the local elevator, the order is sent to the order handler. The order handler then decides wether the order can be taken directly (cab order) or needs to be distributed (hall orders).

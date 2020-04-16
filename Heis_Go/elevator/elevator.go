@@ -63,7 +63,7 @@ func initializeLights() {
 }
 
 
-func UpdateElevatorValues(elevator *Elev, direction elevio.MotorDirection, state State) {
+func UpdateElevatorDirectionsAndStates(elevator *Elev, direction elevio.MotorDirection, state State) {
   UpdatePrevDirection(elevator)
   UpdateCurrDirection(elevator, direction)
   UpdatePrevState(elevator)

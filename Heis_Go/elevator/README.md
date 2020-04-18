@@ -1,4 +1,6 @@
-# Module description
+# Elevator
+
+## Module description
 
 The elevator module has responsibility over the local elevator.
 

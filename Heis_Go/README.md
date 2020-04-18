@@ -15,15 +15,27 @@ In terminal running the simulator:
 
 
 ## Project description
-This project aims to control a system of n elevators operating at m floors. The object is that the elevators should be able to distribute orders amongst themselves, such that the system ideally performs better than with just one single elevator. The system should be fault-tolerant, meaning that all orders should be taken, even when errors appear.
+This project aims to control a system of n elevators operating at m floors. The object is that the elevators should be able to distribute orders amongst themselves, such that the system ideally performs better than with one single elevator. The system should be fault-tolerant, meaning that all orders should be taken, even when errors appear.
 
-In this specific software, we run 2 elevators, both operating at 4 floors. Although, the system is scalable such that it is possible to alter both the number of elevators and number of floors. We assume that at least one elevator works at each time.
+In this specific software, we run 2 elevators, both operating at 4 floors. Although, the system is scalable such that it is possible to alter both the number of elevators and number of floors. Some assumptions were done in order to keep the project at a reasonable size. These where:
+- We assume that at least one elevator works at each time.
+- We assume that only one error occurs at a time.
+- Stop- and Obstruction-buttons can be neglected.
+- Also, we decided to assume that all passengers get on the elevator when it opens on their floor, regardless if the direction of the elevator and the passenger's requested direction is the same or not. This implies that all hall-orders on a floor are cleared whenever an elevator stops. 
 
-The software uses a “momentary master” procedure, where all elevators has the responsibility of distributing orders registered by themselves. To do this, all elevators must have the knowledge of the current position, direction and order list of all other elevators at all time. In addition, all elevators must know which orders are active, that is which orders that already have been assigned and are to be taken. To achieve this, we utilize UDP broadcasting. All orders that are registered are broadcasted, and the status of the elevator is broadcasted each tie there is a change of status. These “messages” are broadcasted to specific ports assigned to each broadcast type.
 
-To make sure the system is fault-tolerant, all elevators has a list of timestamps, that are activated/deactivated whenever an order is assigned/executed. If an elevator detects that the time since a timestamp exceeds a certain amount, the corresponding order is taken by the local elevator. In that way, we make sure that all orders are taken, however, we may observe that some orders are taken by several elevators. 
+The software solution uses a “momentary master” procedure, where all elevators has the responsibility of distributing orders registered by their buttons. To do this, all elevators must have the knowledge of the current position, direction and order list of all other elevators at all times. In addition, all elevators must know which orders are active, that is which orders that already have been assigned and are to be taken. To achieve this, we utilize UDP broadcasting between the elevators. All orders that are registered are broadcasted, and the status of the elevator is broadcasted each time there is a change of status. These “messages” are broadcasted to specific ports assigned to each broadcast type.
 
-This system consists offive main modules, each with its own responsibilities. These are: FSM, Elevator, Order Handler, Order Distributer and Network. You can read more about each module in their own readme files.
+To make sure the system is fault-tolerant, all elevators have a list of timestamps, that are activated/deactivated whenever an order is assigned/executed. If an elevator detects that the time since a timestamp exceeds a certain amount, the corresponding order is taken by the local elevator. In that way, we make sure that all orders are taken. However, we may observe that some orders are taken by several elevators. We found that this was a sufficient solution as it is more important for us that all orders are guaranteed to be taken rather than "saving energy" by holding back elevators.
+
+This system consists of five main modules, each with its own responsibilities. These are: Elevator, State Machine, Order Handler, Order Distributer and Network. Additionally, we have seperated lower level functions from the main modules into their own respective modules. Some of these are named after their corresponding main module (i.e. stateMachine-helpfunc) or simply stands on it's own (i.e. timer). You can read more about each module in their own README-file.
+
+
+### One elevator
+
+A single elevator is operational through the main modules Elevator, State Machine and Order Handler. In order to understand our solution we encourage you to begin with these modules.
+
+
 
 ## Comunication between modules
 ### Communication sequences

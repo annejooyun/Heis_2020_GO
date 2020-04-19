@@ -28,32 +28,29 @@ The software solution uses a “momentary master” procedure, where all elevato
 
 To make sure the system is fault-tolerant, all elevators have a list of timestamps, that are activated/deactivated whenever an order is assigned/executed. If an elevator detects that the time since a timestamp exceeds a certain amount, the corresponding order is taken by the local elevator. In that way, we make sure that all orders are taken. However, we may observe that some orders are taken by several elevators. We found that this was a sufficient solution as it is more important for us that all orders are guaranteed to be taken rather than "saving energy" by holding back elevators.
 
-This system consists of five main modules, each with its own responsibilities. These are: Elevator, State Machine, Order Handler, Order Distributer and Network. Additionally, we have seperated lower level functions from the main modules into their own respective modules. Some of these are named after their corresponding main module (i.e. stateMachine-helpfunc) or simply stands on it's own (i.e. timer). You can read more about each module in their own README-file.
-
-
-### One elevator
-
-A single elevator is operational through the main modules Elevator, State Machine and Order Handler. In order to understand our solution we encourage you to begin with these modules.
+This system consists of five main modules, each with its own responsibilities. These are: Elevator, State Machine, Order Handler, Order Distributer and Network. Additionally, we have seperated lower level functions from the main modules into their own respective modules. Some of these are named after their corresponding main module (i.e. stateMachine-helpfunc) or simply stands on it's own (i.e. timer). You can read more about each module in their own README-file. A single elevator is operational through the main modules Elevator, State Machine and Order Handler. In order to understand our solution we encourage you to begin with these modules.
 
 
 
 ## Comunication between modules
 ### Communication sequences
-The communication between the modules are mainly done by sending messages over channels. In this system there are three main sequences of messaging, and they consern: status updates, registered orders and executed orders.
+The communication between the modules is mainly done by sending messages over channels. In this system there are three main sequences of messaging, and they consern: status updates, registered orders and executed orders.
 
 #### Status updates
 For the system to be able to correctly distribute orders, all elevators must know the status of all other elevators. The relevant information is each elevators current position, current direction and their order list.
 
-To be able to seperate the elevators, all elevators has a unique ID. That ID is the same as the TCP port used to communicate with the elevator server.
+To be able to seperate the elevators, all elevators has a unique ID. The ID is the same as the TCP port used to communicate with the elevator server.
 
-A status update is to be sent every time there has happend a status update. That is, every time the elevator reaches a new floor or changes direction. When this happens, the FSM module sends a boolean true to the elevator module, thereby telling the elevator module that there has been a change of state. The elevator module then sends a copy of the elevator object to the order distributer.
+A status update is to be sent every time something has happened. That is, every time the elevator reaches a new floor or changes direction. When this happens, the stateMachine-module sends a boolean true to the elevator-module, thereby telling the elevator-module that there has been a change of state. The elevator-module then sends a copy of the elevator object to the orderDistributer.
 
-The order distributer registers the status update correctly by placing the elevator object in the list ELEVATOR_STATUS_LIST and the corresponding ID on the same place (same index) in the list ADDED_ELEVATORS. When the status update has been correctly registerd, it is sent to the network module, to be broadcasted.
+The orderDistributer registers the status update correctly by placing the elevator object in the list ELEVATOR_STATUS_LIST and the corresponding ID on the same place (same index) in the list ADDED_ELEVATORS. When the status update has been correctly registerd, it is sent to the network-module, to be broadcasted.
 
-All status updates are broadcasted to the same port (20000). The function StartSendingAndReceivingStatusUpdates starts two goroutines which at all time broadcasts all status updates sent on a specific channel, and sends all messages received on port 20000 on another. When a status update from another elevator has been received, the status lists are updated as described earlier.
+All status updates are broadcasted to the same port (20000). The function InitializeStatusUpdates starts two goroutines which at all time broadcast all status updates sent on a specific channel, and sends all messages received on port 20000 on another. When a status update from another elevator has been received, the status lists are updated as described earlier.
+
 
 #### Order registered
-An order is registered by an elevator in the form of a button push detected in the FSM. When a button is pushed, the corresponding order is sent to the order handler module. These orders are called "*internal orders*" and are on the form of an ButtonEvent (see elevio).
+
+An order is registered by an elevator in the form of a button push detected in the stateMachine. When a button is pushed, the corresponding order is sent to the order handler module. These orders are called "*internal orders*" and are on the form of an ButtonEvent (see the elevio-module).
 
 The order handler module now has to decide what to do with the order. If the order is a cab order, it must be taken by the local elevator. The order is therefore inserted in the order list of the local elevator, and the communication sequence ends.
 

@@ -6,10 +6,15 @@ import (
   "time"
 )
 
+
+
+
 var endTime time.Time
 var timerActive bool
 var startUpTime time.Time = time.Now()
 var DoorOpenTime int = 5
+
+
 
 
 func StartTimer(duration int) {
@@ -18,7 +23,6 @@ func StartTimer(duration int) {
   timerActive = true
   fmt.Println(endTime)
 }
-
 
 
 func stopTimer() {

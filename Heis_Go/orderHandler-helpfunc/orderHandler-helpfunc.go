@@ -1,9 +1,12 @@
-package orderHandlerHF
+ package orderHandlerHF
 
 import (
   "../elevator"
   "../elevio"
 )
+
+
+
 
 func AddOrder(elev *elevator.Elev, button elevio.ButtonEvent) {
   elev.OrderList[button.Floor][button.Button] = 1
@@ -40,7 +43,7 @@ func OrdersBelow(elev *elevator.Elev) bool {
 
 
 func ClearOrdersAtCurrentFloor(elev *elevator.Elev) {
-	//Always delete cab order at current floor
+	//Delete orders
 	RemoveOrder(elev, elevio.BT_Cab, elev.Floor)
   RemoveOrder(elev, elevio.BT_HallUp, elev.Floor)
   RemoveOrder(elev, elevio.BT_HallDown, elev.Floor)

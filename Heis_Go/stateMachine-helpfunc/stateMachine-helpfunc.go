@@ -52,6 +52,12 @@ func DoorTimeout(elev *elevator.Elev) {
 
 func chooseDirection(elev *elevator.Elev) elevio.MotorDirection {
 	//Deciding where the elevator should go next based on the previous direction
+	if elev.Floor == 0{
+		return elevio.MD_Up
+	}else if elev.Floor == elevator.N_FLOORS - 1{
+		return elevio.MD_Down
+	}
+
 	switch elev.PrevDirection {
 	case elevio.MD_Up:
 		//Are there any orders above?

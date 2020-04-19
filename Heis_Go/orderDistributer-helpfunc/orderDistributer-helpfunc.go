@@ -3,9 +3,12 @@ package orderDistributerHF
 import(
   "../elevator"
   "../elevio"
+
   "time"
   "fmt"
 )
+
+
 
 type ExtOrder struct {
   Id string
@@ -15,6 +18,7 @@ type ExtOrder struct {
 
 
 const TIMEOUT_LIMIT = 40
+const POLL_RATE = 20
 
 const N_ELEVATORS = 3
 const TRAVEL_TIME = 2
@@ -29,8 +33,6 @@ var ACTIVE_ORDERS [elevator.N_FLOORS][2] int //If an order is beeing executed th
 
 var TIMER_ACTIVE_ORDERS [elevator.N_FLOORS][2] int64 //List of timestamps for orders
 
-
-//---------------------------------------------------------------------------------------------------------------------------//
 
 
 
@@ -79,7 +81,6 @@ func RemoveOrdersOnFloor(floor int) {
 }
 
 
-//convert from type internalOrder (elevio.ButtonEvent) to type ExtOrder
 func ConvertToExternalOrder(order elevio.ButtonEvent, owner string) ExtOrder{
   var externalOrder ExtOrder
   externalOrder.Id = owner
@@ -89,7 +90,6 @@ func ConvertToExternalOrder(order elevio.ButtonEvent, owner string) ExtOrder{
 }
 
 
-//Convert from type ExtOrder to internalOrder (elevio.ButtonEvent)
 func ConvertToInternalOrder(order ExtOrder) elevio.ButtonEvent {
   var internalOrder elevio.ButtonEvent
   internalOrder.Floor = order.Floor
@@ -114,10 +114,9 @@ func UpdateElevatorStatusList(elevator_status elevator.Elev) {
 }
 
 
-//---------------------------------------------------------------------------------------------------------------------------//
 
 
-//Finds the absolute value of an int
+
 func absInt(value int) int{
   if value < 0 {
     return -value
@@ -140,7 +139,7 @@ func numOrders(elev elevator.Elev) int {
 
 
 //Counts the number of floors the elevator must pass (worst case) to get to a specified order.
-func numFloors(elev elevator.Elev, order elevio.ButtonEvent) int{
+func numFloorsAway(elev elevator.Elev, order elevio.ButtonEvent) int{
   nFloors := 0
   maxFloor := elevator.N_FLOORS - 1
 
@@ -166,6 +165,7 @@ func numFloors(elev elevator.Elev, order elevio.ButtonEvent) int{
     destinationDir = -1
   }
   for {
+    time.Sleep(POLL_RATE*time.Millisecond)
     if currentFloor == destinationFloor && currentDir == destinationDir {
       break
     } else {
@@ -180,19 +180,18 @@ func numFloors(elev elevator.Elev, order elevio.ButtonEvent) int{
 }
 
 
-//Have to update cost function
+//May have to update cost function
 func simpleCostFunction(elev elevator.Elev, order elevio.ButtonEvent) int {
   cost := numOrders(elev) * DOOR_OPEN_TIME
   if elev.CurrDirection == elevio.MD_Stop{
     cost += absInt(order.Floor - elev.Floor) * TRAVEL_TIME
   } else {
-    cost += numFloors(elev, order) * TRAVEL_TIME
+    cost += numFloorsAway(elev, order) * TRAVEL_TIME
   }
   return cost
 }
 
 
-//Checks if timeout has happened
 func IsOrderTimeout(timestamp int64) bool {
   var currTime int64
   currTime = time.Now().Unix()

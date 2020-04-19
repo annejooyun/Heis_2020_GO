@@ -9,43 +9,10 @@ import (
   //"../orderHandler"
 
   "fmt"
+  "time"
 )
 
 
-
-func PollStatusUpdates(internal_status_update chan elevator.Elev,
-                       external_status_update chan elevator.Elev,
-                       broadcast_status_update chan elevator.Elev) {
-
-  for {
-    select {
-    case elevator_status := <- internal_status_update: //elevator_status is an elevator object
-      broadcast_status_update <- elevator_status
-      orderDistributerHF.UpdateElevatorStatusList(elevator_status)
-
-    case elevator_status := <- external_status_update:
-      orderDistributerHF.UpdateElevatorStatusList(elevator_status)
-    }
-  }
-}
-
-
-func PollOrderTimeout(order_timeout chan elevio.ButtonEvent) {
-
-//  var currTime int64
-  for{
-    //currTime = time.Now().Unix()
-    for floor, orderlist := range orderDistributerHF.TIMER_ACTIVE_ORDERS {
-      for button, timestamp := range orderlist {
-        if orderDistributerHF.IsOrderTimeout(timestamp) {
-          order := elevio.CreateButtonEvent(floor,elevio.IntToButtonType(button))
-          order_timeout <- order
-          orderDistributerHF.SetOrderActive(order,false)
-        }
-      }
-    }
-  }
-}
 
 
 //Main function controling where to send orders
@@ -99,13 +66,48 @@ func RegisterExecutedOrders(receive_orders_executed chan int, internal_order_exe
     case floor := <- receive_orders_executed: //ordersExecuted = floor
       orderDistributerHF.RemoveOrdersOnFloor(floor)
 
-
       //fmt.Printf("Active orders is updated: %v\n", orderDistributerHF.ACTIVE_ORDERS)
 
       case floor := <- internal_order_executed: //ordersExecuted = [order up, order down,floor]
         //fmt.Printf("Active orders is updated: %v\n", orderDistributerHF.ACTIVE_ORDERS)
         //orderDistributerHF.RemoveOrdersOnFloor(floor)
         bcast_order_executed <- floor
+    }
+  }
+}
+
+
+func PollStatusUpdates(internal_status_update chan elevator.Elev,
+                       external_status_update chan elevator.Elev,
+                       broadcast_status_update chan elevator.Elev) {
+
+  for {
+    select {
+    case elevator_status := <- internal_status_update: //elevator_status is an elevator object
+      broadcast_status_update <- elevator_status
+      orderDistributerHF.UpdateElevatorStatusList(elevator_status)
+
+    case elevator_status := <- external_status_update:
+      orderDistributerHF.UpdateElevatorStatusList(elevator_status)
+    }
+  }
+}
+
+
+func PollOrderTimeout(order_timeout chan elevio.ButtonEvent) {
+
+//  var currTime int64
+  for{
+    time.Sleep(orderDistributerHF.POLL_RATE*time.Millisecond)
+    //currTime = time.Now().Unix()
+    for floor, orderlist := range orderDistributerHF.TIMER_ACTIVE_ORDERS {
+      for button, timestamp := range orderlist {
+        if orderDistributerHF.IsOrderTimeout(timestamp) {
+          order := elevio.CreateButtonEvent(floor,elevio.IntToButtonType(button))
+          order_timeout <- order
+          orderDistributerHF.SetOrderActive(order,false)
+        }
+      }
     }
   }
 }

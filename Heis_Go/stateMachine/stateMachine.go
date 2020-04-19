@@ -5,8 +5,8 @@ import (
 	"../elevator"
 	"../elevio"
 	"../timer"
+
 	//"fmt"
-	//"../messageHandler"
 	)
 
 
@@ -50,11 +50,10 @@ func RunStateMachine(elev *elevator.Elev, order_registered chan elevio.ButtonEve
             if floor != -1 && floor != prevFloor {
               stateMachineHF.ArrivedOnFloor(elev) //We have arrived on a new floor
 							//status_updated <- true //There has been a change in status
-							//HEI PETTER TRENGS DENNE LINJEN LENGER????????????????????????????????????????????????????
             }
 						status_updated <- true
 
-
+					//Timeout
 	        case <- ch_timer:
 	          //fmt.Printf("TIMEOUT = ")
 	          //fmt.Printf("%+v\n", timeOut)

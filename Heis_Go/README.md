@@ -62,11 +62,12 @@ Whenever there has happend a broadcast to the order port, the network-module sen
 #### Order executed
 To be able to make sure that all orders are executed, we must let the other elevators know each time an order has been completed. 
 
-In this project, we assume that if the elevators stop at a floor, all passagers at that floor will board the elevator. Thus, each time elevator stops at a floor, we can assume that all UP- and DOWN- orders at that floor are executed. Each time the stateMachine registeres that an order has been executed at a floor, a boolean 'true' is sent to the order handler saying: "all orders on the current floor are executed". The order handler then sends the current position (floor (int)) of the elevator to the order distributer.
+In this project, we assume that if the elevators stop at a floor, all passagers at that floor will board the elevator. Thus, each time elevator stops at a floor, we can assume that all UP- and DOWN- orders at that floor are executed. Each time the stateMachine registeres that an order has been executed at a floor, a boolean `true` is sent to the order handler saying: "all orders on the current floor are executed". The orderHandler then sends the current position (`floor (int)`) of the elevator to the orderDistributer.
 
-The order distributer must now both register that an order is executed. This is done by removing all orders on the correct floor, from the list of active orders. Next, the message that an order has been executed (floor (int)), is sent to the network module, where it is broadcasted on a unique order-executed-port.
+The orderDistributer then registers that the order has been executed. This is done by removing all UP- and DOWN-orders on the correct floor, from the list of active orders. Next, the message that an order has been executed (`floor (int)`), is sent to the network-module, where it is broadcasted on a unique order-executed-port.
 
-Each time the network module detects that a message has been broadcasted to the order-executed-port, a message on the form (floor (int)) is sent to the order distributer, where the orders at the corresponding floor are removed from the list of active orders.
+Each time the network-module detects that a message has been broadcasted to the order-executed-port, a message on the form (`floor (int)`) is sent to the orderDistributer, where the orders at the corresponding floor are removed from the list of active orders.
+
 
 ### Communication overview
 
@@ -77,113 +78,91 @@ The following figure shows an overview of the most important communication chann
 
 ### Channel descriptions
 #### ch_order_reg:
-Type: ButtonEvent
+*Type:* `ButtonEvent`
 
-Usage:
+*Usage:* Order registered
 
-Order registered
-
-Whenever the FSM registeres that a button has been pushed, the order (ButtonEvent) corresponding to the pushed button is sent to the Order Handler using the channel ch_order_registered.
+*Info*: Whenever the stateMachine registeres that a button has been pushed, the order (`ButtonEvent`) corresponding to the pushed button is sent to the orderHandler using the channel `ch_order_registered`.
 
 #### ch_order_exec:
-Type: Bool
+*Type:* `Bool`
 
-Usage:
+*Usage:* Order executed
 
-Order executed
-
-Whenever the elevator stops on a floor, one or more orders are executed. The FSM then sends a True over the channel ch_order_executed, to the order handler, indicating that all orders on the floor the elevator is currently at, has been executed.
+*Info*: Whenever the elevator stops on a floor, one or more orders are executed. The stateMachine then sends a `true` over the channel `ch_order_executed`, to the orderHandler, indicating that all orders on the floor the elevator is currently at, has been executed.
 
 #### ch_status_changed
-Type: Bool
+*Type:* `Bool`
 
-Usage:
+*Usage:* Elevator status has changed
 
 #### ch_int_stat_update
-Type: Elev
+*Type:* `Elev`
 
-Usage:
+*Usage:* Internal status update
 
-Internal status update
-
-Whenever the Elevator object module is informed that the status has been changed, a copy of the elevator object is sent to the order distributer over the channel ch_internal_status_update
+*Info*: Whenever the elevator-module is informed that the status has been changed, a copy of the elevator object is sent to the orderDistributer over the channel `ch_internal_status_update`.
 
 #### ch_order_to_exec
-Type: ButtonEvent
+*Type:* `ButtonEvent`
 
-Usage:
+*Usage:* Order to execute
 
-Order to execute
-
-If the order distributer distributes an order to the local elevator, it is sent to the order handler via the channel ch_order_to_execute
+*Info*: If the orderDistributer distributes an order to the local elevator, it is sent to the orderHandler via the channel `ch_order_to_execute`.
 
 #### ch_order_to_distribute
-Type: ButtonEvent
+*Type:* `ButtonEvent`
 
-Usage:
+*Usage:* Order to distribute
 
-All hall-orders that the order handler receives from the fsm must be sent to the order distributer, to be distributed. Thus, all hall-orders from the FSM is sent to the order distributer via the channel ch_order_to_distribute.
+*Info*: All hall-orders that the orderHandler receives from the stateMachine must be sent to the orderDistributer, to be distributed. Thus, all hall-orders from the stateMachine is sent to the orderDistributer via the channel `ch_order_to_distribute`.
 
 #### ch_int_order_exec
-Type: Int
+*Type:* `Int`
 
-Usage:
+*Usage:* Internal order executed
 
-Internal order executed
-
-When an internal order is executed at a floor, all orders at that floor are executed. Whenever an order is executed, the floor of which order has been executed at is sent from the order handler to the order distributer.
+*Info*: When an internal order is executed at a floor, all orders at that floor are executed. Whenever an order is executed, the floor of which order has been executed at is sent from the order handler to the order distributer.
 
 #### ch_bcast_stat
-Type: Elev
+*Type:* `Elev`
 
-Usage:
+*Usage:* Broadcast status
 
-Broadcast status
-
-Channel for sending internal status update to the network module, so that it is distributed.
+*Info*: Channel for sending internal status update to the network-module, so that it is distributed to other elevators.
 
 #### ch_rec_stat
-Type: Elev
+*Type:* `Elev`
 
-Usage:
+*Usage:* Receive status
 
-Receive status
-
-Channel for receiving status updates broadcasted by other elevators. The status update is sent to the order distributer, so that the status lists can be updated.
+*Info*: Channel for receiving status updates broadcasted by other elevators. The status update is sent to the local orderDistributer, so that the status lists can be updated.
 
 #### ch_bcast_order
-Type: ExternalOrder
+*Type:* `ExternalOrder`
 
-Usage:
+*Usage:* Broadcast order
 
-Broadcast order
-
-Channel for broadcasting orders that are distributed by the local order distributer.
+*Info*: Channel for broadcasting orders that are distributed by the local orderDistributer.
 
 
-#### ch_rec_order
-Type: ExternalOrder
+#### ch_rec_order`
+*Type:* `ExternalOrder`
 
-Usage:
+*Usage:* Receive order
 
-Receive order
-
-Channel for receiving orders that are broadcasted to the order-port (see network). All orders broadcasted to this port is sent to the order distributer using this channel.
+*Info*: Channel for receiving orders that are broadcasted to the order-port (see network-module). All orders broadcasted to this port are sent to the orderDistributer using this channel.
 
 #### ch_bcast_order_exec
-Type: Int
+*Type:* `Int`
 
-Usage:
+*Usage:* Broadcast order executed
 
-Broadcast order executed
-
-Channel for broadcasting that all orders are executed at a specific floor. Whenever an order has been executed, the order distributer sends a message to the networks module, saying which floor the orders was executed at. The network module then broadcasts the message to a unique order-executed-port (see network). The message descirbed is sent via this channel.
+*Info*: Channel for broadcasting that all orders are executed on a specific floor. Whenever an order has been executed, the orderDistributer sends a message to the network-module, that includes which floor the orders where executed at. The network-module then broadcasts the message to a unique order-executed-port (see network-module). The message descirbed is sent via this channel.
 
 #### ch_rec_order_exec
-Type: Int
+*Type:* `Int`
 
-Usage:
+*Usage:* Receive order executed
 
-Receive order executed
-
-Whenever the network module detects that a message has been broadcasted to the order-executed-port (see network), the message is sent directly to the order distributer, using this channel.
+*Info*: Whenever the network-module detects that a message has been broadcasted to the order-executed-port (see network-module), the message is sent directly to the orderDistributer, using this channel.

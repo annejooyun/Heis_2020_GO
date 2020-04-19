@@ -32,7 +32,8 @@ This system consists of five main modules, each with its own responsibilities. T
 
 
 
-## Comunication between modules
+## Communication between modules
+
 ### Communication sequences
 The communication between the modules is mainly done by sending messages over channels. In this system there are three main sequences of messaging, and they consern: status updates, registered orders and executed orders.
 
@@ -45,25 +46,23 @@ A status update is to be sent every time something has happened. That is, every 
 
 The orderDistributer registers the status update correctly by placing the elevator object in the list ELEVATOR_STATUS_LIST and the corresponding ID on the same place (same index) in the list ADDED_ELEVATORS. When the status update has been correctly registerd, it is sent to the network-module, to be broadcasted.
 
-All status updates are broadcasted to the same port (20000). The function InitializeStatusUpdates starts two goroutines which at all time broadcast all status updates sent on a specific channel, and sends all messages received on port 20000 on another. When a status update from another elevator has been received, the status lists are updated as described earlier.
+All status updates are broadcasted to the same port (20000). The function InitializeStatusUpdates starts two goroutines which at all time broadcast all status updates sent on a specific channel, and sends all messages received on port 20000 on another. When a status update from another elevator has been received, the status lists are updated as previously described.
 
 
 #### Order registered
 
-An order is registered by an elevator in the form of a button push detected in the stateMachine. When a button is pushed, the corresponding order is sent to the order handler module. These orders are called "*internal orders*" and are on the form of an ButtonEvent (see the elevio-module).
+An order is registered by an elevator in the form of a button push detected in the stateMachine. When a button is pushed, the corresponding order is sent to the orderHandler-module. These orders are called "*internal orders*" and are on the form of an ButtonEvent (see the elevio-module).
 
-The order handler module now has to decide what to do with the order. If the order is a cab order, it must be taken by the local elevator. The order is therefore inserted in the order list of the local elevator, and the communication sequence ends.
+The orderHandler-module now has to decide what to do with the order. If the order is a CAB-order, it must be taken by the local elevator, as this has to be ordered within a spesific elevator. The order is therefore only inserted in the order list of the local elevator, and the communication sequence ends.
 
-If, however, the order is a hall order, it is sent directly to the order distributer.
+If, however, the order is a hall order, it is sent directly to the orderDistributer. The orderDistributer now has to decide which elevator should operate the order. This is done with the help of a cost function, which can be found in orderDistributer-helpfunc. When we have found the owner of the order, the internal order is converted to the an "*external order*". The structure *external order* is described in the README in orderDistributer. The external order is sent to the network-module, where it is broadcasted to a specific order port.
 
-The order distributer now has to decide which elevator should operate the order. This is done with the help of a cost function, which can be found in orderDistributer-helpfunc. When we have found the owner of the order, the internal order is converted to the an "*external order*". The structure *external order* is described in the readme in orderDistributer. The external order is sent to the network module, where it is broadcasted to a specific order port.
-
-Whenever there has happend a broadcast to the order port, the network module sends the order to the order distributer. If the ID of the owner of the order is the same as the local ID, the order is converted back to an internal order, before it is sent to the order handler where it is placed in the order list of the local elevator.
+Whenever there has happend a broadcast to the order port, the network-module sends the order to the orderDistributer. If the ID of the owner of the order is the same as the local ID, the order is converted back to an internal order. Further, it is sent to the orderHandler where it is placed in the order list of the local elevator.
 
 #### Order executed
-To be able to make sure that all orders are executed, we must let the other elevators know each time we have completed an order. 
+To be able to make sure that all orders are executed, we must let the other elevators know each time an order has been completed. 
 
-In this project, we assume that if the elevators stop at a floor, all customers at that floor will board the elevator. Thus, each time elevator stops at a floor, we can assume that all orders at that floor are executed. Each time the FSM registeres that an order is executed at a floor, a boolean true is sent to the order handler saying: "all orders on the current floor are executed". The order handler then sends the current position (floor (int)) of the elevator to the order distributer.
+In this project, we assume that if the elevators stop at a floor, all passagers at that floor will board the elevator. Thus, each time elevator stops at a floor, we can assume that all UP- and DOWN- orders at that floor are executed. Each time the stateMachine registeres that an order has been executed at a floor, a boolean 'true' is sent to the order handler saying: "all orders on the current floor are executed". The order handler then sends the current position (floor (int)) of the elevator to the order distributer.
 
 The order distributer must now both register that an order is executed. This is done by removing all orders on the correct floor, from the list of active orders. Next, the message that an order has been executed (floor (int)), is sent to the network module, where it is broadcasted on a unique order-executed-port.
 

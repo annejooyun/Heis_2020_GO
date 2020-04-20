@@ -134,7 +134,7 @@ The following figure shows an overview of the most important communication chann
 *Info*: Channel for sending internal status update to the network-module, so that it is distributed to other elevators.
 
 
-#### ch_ext_stat_update: IS THIS CORRECT?
+#### ch_ext_stat_update:
 *Type:* `Elev`
 
 *Usage:* Receive status

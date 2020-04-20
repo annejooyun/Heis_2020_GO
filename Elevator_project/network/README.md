@@ -29,6 +29,3 @@ All order updates are broadcasted to the port stated. This port is unique and on
 All messages sent to the port stated, are directly sent to the orderDistributer via the channel `ch_rec_order_exec`.
 
 
-
-
-For more specific information, see the readme in network-helpfunc.

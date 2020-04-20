@@ -59,15 +59,16 @@ func InitializeElevator(ConnectionPort string) Elev {
   return elevator
 }
 
-//Turns off all lights when initializing the elevator
-func initializeLights() {
-  for floor:= 0; floor < N_FLOORS; floor++ {
-    elevio.SetButtonLamp(elevio.BT_HallUp, floor, false)
-    elevio.SetButtonLamp(elevio.BT_HallDown, floor, false)
-    elevio.SetButtonLamp(elevio.BT_Cab, floor, false)
+
+func PollInternalElevatorStatus(elev *Elev, status_updated chan bool, send_status_update chan Elev) {
+  for {
+    select {
+    case shouldUpdate := <- status_updated:
+      if shouldUpdate {
+        send_status_update <- *elev
+      }
+    }
   }
-  elevio.SetDoorOpenLamp(false)
-  elevio.SetStopLamp(false)
 }
 
 
@@ -82,6 +83,19 @@ func UpdateElevatorDirectionsAndStates(elev *Elev, direction elevio.MotorDirecti
   fmt.Printf("CurrState = %d\n", elev.CurrState)
 }
 
+
+
+
+//Turns off all lights when initializing the elevator
+func initializeLights() {
+  for floor:= 0; floor < N_FLOORS; floor++ {
+    elevio.SetButtonLamp(elevio.BT_HallUp, floor, false)
+    elevio.SetButtonLamp(elevio.BT_HallDown, floor, false)
+    elevio.SetButtonLamp(elevio.BT_Cab, floor, false)
+  }
+  elevio.SetDoorOpenLamp(false)
+  elevio.SetStopLamp(false)
+}
 
 func updateCurrState(elev *Elev, state State){
   elev.CurrState = state
@@ -105,16 +119,4 @@ func updatePrevDirection(elev *Elev) {
 
 func UpdateFloor(elev *Elev, floor int) {
   elev.Floor = floor
-}
-
-
-func PollInternalElevatorStatus(elev *Elev, status_updated chan bool, send_status_update chan Elev) {
-  for {
-    select {
-    case shouldUpdate := <- status_updated:
-      if shouldUpdate {
-        send_status_update <- *elev
-      }
-    }
-  }
 }

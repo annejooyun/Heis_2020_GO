@@ -1,4 +1,4 @@
-# README for elevator project spring 2020
+# README for Elevator Project spring 2020
 
 ## Using the simulator
 

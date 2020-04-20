@@ -71,53 +71,49 @@ func initializeLights() {
 }
 
 
-func UpdateElevatorDirectionsAndStates(elevator *Elev, direction elevio.MotorDirection, state State) {
-  updatePrevDirection(elevator)
-  updateCurrDirection(elevator, direction)
-  updatePrevState(elevator)
-  updateCurrState(elevator, state)
+func UpdateElevatorDirectionsAndStates(elev *Elev, direction elevio.MotorDirection, state State) {
+  updatePrevDirection(elev)
+  updateCurrDirection(elev, direction)
+  updatePrevState(elev)
+  updateCurrState(elev, state)
+  fmt.Printf("PrevDir = %d\n", elev.PrevDirection)
+  fmt.Printf("CurrDir = %d\n", elev.CurrDirection)
+  fmt.Printf("PrevState = %d\n", elev.PrevState)
+  fmt.Printf("CurrState = %d\n", elev.CurrState)
 }
 
 
-func updateCurrState(elevator *Elev, state State){
-  elevator.CurrState = state
-  //fmt.Println("New CurrState")
-  //fmt.Printf("%+v\n", elevator.CurrState)
+func updateCurrState(elev *Elev, state State){
+  elev.CurrState = state
 }
 
 
-func updatePrevState(elevator *Elev){
-  elevator.PrevState = elevator.CurrState
-  //fmt.Println("New PrevState")
-  //fmt.Printf("%+v\n", elevator.PrevState)
+func updatePrevState(elev *Elev){
+  elev.PrevState = elev.CurrState
 }
 
 
-func updateCurrDirection(elevator *Elev, direction elevio.MotorDirection) {
-  elevator.CurrDirection = direction
-  //fmt.Println("New CurrDirection")
-  //fmt.Printf("%+v\n", elevator.CurrDirection)
+func updateCurrDirection(elev *Elev, direction elevio.MotorDirection) {
+  elev.CurrDirection = direction
 }
 
 
-func updatePrevDirection(elevator *Elev) {
-  elevator.PrevDirection = elevator.CurrDirection
-  //fmt.Println("New PrevDirection")
-  //fmt.Printf("%+v\n", elevator.PrevDirection)
+func updatePrevDirection(elev *Elev) {
+  elev.PrevDirection = elev.CurrDirection
 }
 
 
-func UpdateFloor(elevator *Elev, floor int) {
-  elevator.Floor = floor
+func UpdateFloor(elev *Elev, floor int) {
+  elev.Floor = floor
 }
 
 
-func PollInternalElevatorStatus(elevator *Elev, status_updated chan bool, send_status_update chan Elev) {
+func PollInternalElevatorStatus(elev *Elev, status_updated chan bool, send_status_update chan Elev) {
   for {
     select {
     case shouldUpdate := <- status_updated:
       if shouldUpdate {
-        send_status_update <- *elevator
+        send_status_update <- *elev
       }
     }
   }

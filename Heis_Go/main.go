@@ -6,10 +6,6 @@ import (
   "./orderHandler"
   "./stateMachine"
   "./network"
-  //"./timer"
-  //"fmt"
-  //"./Network-go/network/bcast"
-  //"./messageHandler"
   "./orderDistributer"
   "./orderDistributer-helpfunc"
 )
@@ -24,7 +20,7 @@ func main(){
 
 
     //CREATING CHANNELS
-    //Internal elevator channels
+    //**Internal elevator channels**
 
     //Whenever a new order is registered by the order handler, the order is sent to the state machine
     ch_new_order := make(chan elevio.ButtonEvent)
@@ -39,13 +35,13 @@ func main(){
     ch_stat_updated := make(chan bool)
 
 
-    //Communication between elevator (control) and order distributer
+    //**Communication between elevator and order distributer**
 
     //Channel for sending status updates
     ch_int_stat_update := make(chan elevator.Elev)
 
 
-    //Communication between order handler and order distributer
+    //**Communication between order handler and order distributer**
 
     //Orders delegated to local elevator is sent to order handler
     ch_order_to_exec := make(chan elevio.ButtonEvent)
@@ -61,12 +57,6 @@ func main(){
     ch_bcast_order := make(chan orderDistributerHF.ExtOrder)
     ch_rec_ext_order := make(chan orderDistributerHF.ExtOrder)
 
-/*
-    ch_bcast_order_exec := make(chan []int)
-    ch_rec_order_exec := make(chan []int)
-
-    ch_int_order_exec := make(chan []int)*/
-
     ch_bcast_order_exec := make(chan int)
     ch_rec_order_exec := make(chan int,2)
 
@@ -76,24 +66,28 @@ func main(){
 
 
 
+
     //STARTING GOROUTINES
+
+    //Polling
     go elevator.PollInternalElevatorStatus(&elev, ch_stat_updated, ch_int_stat_update) //Whenever the status of the local elevator is updated, send an elevator copy to the order distributer
-
-    go orderHandler.DistributeInternalOrders(&elev,ch_order_registered, ch_order_to_exec, ch_order_to_distribute, ch_new_order)
-
-    go orderHandler.RegisterExecutedOrders(&elev,ch_order_executed, ch_int_order_exec)
 
     go orderDistributer.PollStatusUpdates(ch_int_stat_update, ch_ext_stat_update, ch_bcast_stat_update)
 
-    go orderDistributer.DistributeOrders(ch_order_to_distribute, ch_order_to_exec, ch_bcast_order, ch_order_timeout)
+    go orderDistributer.PollOrderTimeout(ch_order_timeout)
+
+    //Each button-push "travels" through these goroutines in order to be distributed and executed properly
+    go orderHandler.DistributeInternalOrders(&elev,ch_order_registered, ch_order_to_exec, ch_order_to_distribute, ch_new_order)
 
     go orderDistributer.ReceiveOrders(ch_rec_ext_order, ch_order_to_exec)
 
-    //go orderDistributer.NewDistributeOrders(&elev,ch_order_registered, ch_new_order, ch_rec_ext_order, ch_bcast_order, ch_order_timeout)
+    go orderDistributer.DistributeOrders(ch_order_to_distribute, ch_order_to_exec, ch_bcast_order, ch_order_timeout)
+
+    go orderHandler.RegisterExecutedOrders(&elev,ch_order_executed, ch_int_order_exec)
 
     go orderDistributer.RegisterExecutedOrders(ch_rec_order_exec, ch_int_order_exec, ch_bcast_order_exec)
 
-    go orderDistributer.PollOrderTimeout(ch_order_timeout)
+
 
 
     //BEGIN SENDING AND RECEIVING BROADCASTS

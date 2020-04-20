@@ -6,12 +6,11 @@ To run a new elevator type in the following:
 
 Choose a 5 digit connection port, i.e. `12345`.
 
-In the terminal running the program:
-`go run -ldflags="-X main.TCP_ConnectionPort=12345" main.go`
+In terminal running the simulator: `./SimElevatorServer --port 12345`
 
-In terminal running the simulator:
+In the terminal running the program: `go run -ldflags="-X main.TCP_ConnectionPort=12345" main.go`
 
-`./SimElevatorServer --port 12345`
+
 
 
 ## Project description

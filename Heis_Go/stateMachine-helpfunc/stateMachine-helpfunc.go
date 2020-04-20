@@ -4,18 +4,23 @@ package stateMachineHF
 import (
 	"../elevator"
 	"../elevio"
-	"../timer"
 	"../orderHandler-helpfunc"
+	"../timer"
+
+	"fmt"
 )
 
+
+
+
 func ButtonPressedWhileIdle(elev *elevator.Elev, pressedButton elevio.ButtonEvent) {
+
 	//Is the elevator on the floor that was ordered?
 	if pressedButton.Floor == elev.Floor{
 		stopOnFloor(elev)
-		timer.StartTimer(timer.DoorOpenTime)
+		timer.StartTimer(timer.DOOR_OPEN_TIME)
 
 	} else {
-		//direction := chooseDirectionIdle(elev)
 		direction := chooseDirection(elev)
 		elevio.SetMotorDirection(direction)
 		elevator.UpdateElevatorDirectionsAndStates (elev, direction, elevator.Moving)
@@ -24,70 +29,75 @@ func ButtonPressedWhileIdle(elev *elevator.Elev, pressedButton elevio.ButtonEven
 
 
 func ArrivedOnFloor(elev *elevator.Elev) {
-	//Are there any orders this elevator should take at this floor?
+
 	if shouldIStop(elev) {
-		//Stopping, opens door and waits
 		stopOnFloor(elev)
-		timer.StartTimer(timer.DoorOpenTime)
+		timer.StartTimer(timer.DOOR_OPEN_TIME)
 	}
 }
 
 
 func DoorTimeout(elev *elevator.Elev) {
+
 	elevio.SetDoorOpenLamp(false)
 
-	//direction := ChooseDirectionIdle(elev)
 	direction := chooseDirection(elev)
 	elevio.SetMotorDirection(direction)
+
 	switch direction {
 	case elevio.MD_Stop:
 		elevator.UpdateElevatorDirectionsAndStates(elev, direction, elevator.Idle)
 	default :
 		elevator.UpdateElevatorDirectionsAndStates(elev, direction, elevator.Moving)
 	}
-
-
 }
 
 
 func chooseDirection(elev *elevator.Elev) elevio.MotorDirection {
+
 	//Deciding where the elevator should go next based on the previous direction
-	if elev.Floor == 0{
+	if elev.Floor == 0 && orderHandlerHF.OrdersAbove(elev){
 		return elevio.MD_Up
-	}else if elev.Floor == elevator.N_FLOORS - 1{
+
+	}else if elev.Floor == (elevator.N_FLOORS - 1) && orderHandlerHF.OrdersBelow(elev){
 		return elevio.MD_Down
 	}
 
 	switch elev.PrevDirection {
 	case elevio.MD_Up:
-		//Are there any orders above?
+
 		if orderHandlerHF.OrdersAbove(elev) {
 			return elevio.MD_Up
-		//Are there any order below?
+
 		} else if orderHandlerHF.OrdersBelow(elev) {
 			return elevio.MD_Down
-		//If not, then stand still
+
 		} else {
 			return elevio.MD_Stop
 		}
 
 	case elevio.MD_Down:
-		//Are there any order below?
+
 		if orderHandlerHF.OrdersBelow(elev) {
 			return elevio.MD_Down
-		//Are there any orders above?
+
 		} else if orderHandlerHF.OrdersAbove(elev) {
 			return elevio.MD_Up
-		//If not, then stand still
+
 		} else {
 			return elevio.MD_Stop
 		}
 
 	case elevio.MD_Stop:
+
 		if orderHandlerHF.OrdersAbove(elev) {
 			return elevio.MD_Up
+
 		} else if orderHandlerHF.OrdersBelow(elev){
 			return elevio.MD_Down
+
+		} else{
+			return elevio.MD_Stop
 		}
 	}
 	return elevio.MD_Stop

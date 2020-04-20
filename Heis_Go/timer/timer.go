@@ -2,37 +2,36 @@
 package timer
 
 import (
-  "fmt"
   "time"
 )
 
 
 
 
-var endTime time.Time
-var timerActive bool
-var startUpTime time.Time = time.Now()
-var DoorOpenTime int = 5
+var END_TIME time.Time
+var TIMER_ACTIVE bool
+var STARTUP_TIME time.Time = time.Now()
+
+var DOOR_OPEN_TIME int = 5
 
 
 
 
 func StartTimer(duration int) {
   startTime := time.Now()
-  endTime = startTime.Add(time.Second*time.Duration(duration))
-  timerActive = true
-  fmt.Println(endTime)
+  END_TIME = startTime.Add(time.Second*time.Duration(duration))
+  TIMER_ACTIVE = true
 }
 
 
 func stopTimer() {
-  timerActive = false
+  TIMER_ACTIVE = false
 }
 
 
 func PollTimeOut(recieve chan <- bool) {
   for {
-    if timerActive && endTime.Sub(time.Now()) < 0 {
+    if TIMER_ACTIVE && END_TIME.Sub(time.Now()) < 0 {
       recieve <- true
       stopTimer()
     }

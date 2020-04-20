@@ -5,7 +5,6 @@ import(
   "../elevio"
 
   "time"
-  "fmt"
 )
 
 
@@ -24,13 +23,9 @@ const N_ELEVATORS = 3
 const TRAVEL_TIME = 2
 const DOOR_OPEN_TIME = 3
 
-
 var ELEVATOR_STATUS_LIST [N_ELEVATORS] elevator.Elev //Contains the previous registered states of all connected elevators
 var ADDED_ELEVATORS [N_ELEVATORS] string //Contains the Id's of added elevators
-
-
 var ACTIVE_ORDERS [elevator.N_FLOORS][2] int //If an order is beeing executed the element is set to 1
-
 var TIMER_ACTIVE_ORDERS [elevator.N_FLOORS][2] int64 //List of timestamps for orders
 
 
@@ -48,7 +43,6 @@ func BestChoice(order elevio.ButtonEvent) string {
       best_choice = element.Id
     }
   }
-  fmt.Printf("Best cost: %d\n",best_cost)
   return best_choice
 }
 
@@ -71,7 +65,7 @@ func SetOrderActive(order elevio.ButtonEvent, active bool){
 }
 
 
-func RemoveOrdersOnFloor(floor int) {
+func RemoveOrdersInActiveOrders(floor int) {
   for index,_ := range ACTIVE_ORDERS[floor] {
     ACTIVE_ORDERS[floor][index] = 0
     TIMER_ACTIVE_ORDERS[floor][index] = 0
@@ -104,10 +98,6 @@ func UpdateElevatorStatusList(elevator_status elevator.Elev) {
     if element == "" || element == elevator_status.Id {
       ADDED_ELEVATORS[index] = elevator_status.Id
       ELEVATOR_STATUS_LIST[index] = elevator_status
-
-      //Printout to check what happens
-      //fmt.Printf("Status updated for %s\n", elevator_status.Id)
-      //fmt.Printf("The elevator list now contains the following elevators: %v\n",ADDED_ELEVATORS)
       break
     }
   }

@@ -22,35 +22,28 @@ func main(){
     //CREATING CHANNELS
     //**Internal elevator channels**
 
-    //Whenever a new order is registered by the order handler, the order is sent to the state machine
     ch_new_order := make(chan elevio.ButtonEvent)
 
-    //All orders detected by the local elevator is sent to the order handler
     ch_order_registered := make(chan elevio.ButtonEvent)
 
-    //Message from fsm that a order has been executed at current floor
     ch_order_executed := make(chan bool)
 
-    //Whenever a message is sent on this channel, a status update is sent to order distributer
     ch_stat_updated := make(chan bool)
 
 
-    //**Communication between elevator and order distributer**
+    //**Communication between elevator and orderDistributer**
 
-    //Channel for sending status updates
     ch_int_stat_update := make(chan elevator.Elev)
 
 
-    //**Communication between order handler and order distributer**
+    //**Communication between orderHandler and orderDistributer**
 
-    //Orders delegated to local elevator is sent to order handler
     ch_order_to_exec := make(chan elevio.ButtonEvent)
 
-    //Orders to be delegated is sent from order handler to distributer
     ch_order_to_distribute := make(chan elevio.ButtonEvent)
 
 
-    //Communication between order distributer and message handler
+    //**Communication between order distributer and network
     ch_bcast_stat_update := make(chan elevator.Elev)
     ch_ext_stat_update := make(chan elevator.Elev)
 
@@ -69,14 +62,12 @@ func main(){
 
     //STARTING GOROUTINES
 
-    //Polling
     go elevator.PollInternalElevatorStatus(&elev, ch_stat_updated, ch_int_stat_update) //Whenever the status of the local elevator is updated, send an elevator copy to the order distributer
 
     go orderDistributer.PollStatusUpdates(ch_int_stat_update, ch_ext_stat_update, ch_bcast_stat_update)
 
     go orderDistributer.PollOrderTimeout(ch_order_timeout)
 
-    //Each button-push "travels" through these goroutines in order to be distributed and executed properly
     go orderHandler.DistributeInternalOrders(&elev,ch_order_registered, ch_order_to_exec, ch_order_to_distribute, ch_new_order)
 
     go orderDistributer.ReceiveOrders(ch_rec_ext_order, ch_order_to_exec)

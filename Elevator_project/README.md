@@ -41,7 +41,7 @@ For the system to be able to correctly distribute orders, all elevators must kno
 
 To be able to seperate the elevators, all elevators has a unique ID. The ID is the same as the TCP port used to communicate with the elevator server.
 
-A status update is to be sent every time something has happened. That is, every time the elevator reaches a new floor or changes direction. When this happens, the stateMachine-module sends a boolean true to the elevator-module, thereby telling the elevator-module that there has been a change of state. The elevator-module then sends a copy of the elevator object to the orderDistributer.
+A status update is to be sent every time something has happened. That is, every time the elevator reaches a new floor or changes direction. When this happens, the stateMachine-module sends a boolean `true` to the elevator-module, thereby telling the elevator-module that there has been a change of state. The elevator-module then sends a copy of the elevator object to the orderDistributer.
 
 The orderDistributer registers the status update correctly by placing the elevator object in the list `ELEVATOR_STATUS_LIST` and the corresponding ID on the same place (same index) in the list `ADDED_ELEVATORS`. When the status update has been correctly registerd, it is sent to the network-module, to be broadcasted.
 
@@ -76,31 +76,41 @@ The following figure shows an overview of the most important communication chann
 ![Alt text](overview_channels.png)
 
 ### Channel descriptions
-#### ch_order_reg:
+
+#### ch_new_order:
+*Type:* `ButtonEvent`
+
+*Usage:* New order
+
+*Info*: Whenever a new order is registered by the orderHandler, the order is sent to the stateMachine.
+
+#### ch_order_registered:
 *Type:* `ButtonEvent`
 
 *Usage:* Order registered
 
 *Info*: Whenever the stateMachine registeres that a button has been pushed, the order (`ButtonEvent`) corresponding to the pushed button is sent to the orderHandler using the channel `ch_order_registered`.
 
-#### ch_order_exec:
+#### ch_order_executed:
 *Type:* `Bool`
 
 *Usage:* Order executed
 
-*Info*: Whenever the elevator stops on a floor, one or more orders are executed. The stateMachine then sends a `true` over the channel `ch_order_executed`, to the orderHandler, indicating that all orders on the floor the elevator is currently at, has been executed.
+*Info*: Whenever the elevator stops on a floor, one or more orders are executed. The stateMachine then sends a `true` over the channel `ch_order_executed`, to the orderHandler, indicating that some or all orders on the floor the elevator is currently at, has been executed.
 
-#### ch_status_changed:
+#### ch_stat_updated:
 *Type:* `Bool`
 
 *Usage:* Elevator status has changed
+
+*Info*: Whenever a message is sent on this channel, the elevator-module sends a status update to the orderDistributer
 
 #### ch_int_stat_update:
 *Type:* `Elev`
 
 *Usage:* Internal status update
 
-*Info*: Whenever the elevator-module is informed that the status has been changed, a copy of the elevator object is sent to the orderDistributer over the channel `ch_internal_status_update`.
+*Info*: Whenever the elevator-module is informed that the status has been changed by the channel above, a copy of the elevator object is sent to the orderDistributer over the channel `ch_int_stat_update`.
 
 #### ch_order_to_exec:
 *Type:* `ButtonEvent`
@@ -114,38 +124,32 @@ The following figure shows an overview of the most important communication chann
 
 *Usage:* Order to distribute
 
-*Info*: All hall-orders that the orderHandler receives from the stateMachine must be sent to the orderDistributer, to be distributed. Thus, all hall-orders from the stateMachine is sent to the orderDistributer via the channel `ch_order_to_distribute`.
+*Info*: All hall-orders that the orderHandler registers must be sent to the orderDistributer, to be distributed. Thus, all hall-orders is sent to the orderDistributer via the channel `ch_order_to_distribute`.
 
-#### ch_int_order_exec:
-*Type:* `Int`
-
-*Usage:* Internal order executed
-
-*Info*: When an internal order is executed at a floor, all orders at that floor are executed. Whenever an order is executed, the floor of which order has been executed at is sent from the order handler to the order distributer.
-
-#### ch_bcast_stat:
+#### ch_bcast_stat_update:
 *Type:* `Elev`
 
 *Usage:* Broadcast status
 
 *Info*: Channel for sending internal status update to the network-module, so that it is distributed to other elevators.
 
-#### ch_rec_stat:
+
+#### ch_ext_stat_update: IS THIS CORRECT?
 *Type:* `Elev`
 
 *Usage:* Receive status
 
 *Info*: Channel for receiving status updates broadcasted by other elevators. The status update is sent to the local orderDistributer, so that the status lists can be updated.
 
-#### ch_bcast_order
+
+#### ch_bcast_order:
 *Type:* `ExternalOrder`
 
 *Usage:* Broadcast order
 
 *Info*: Channel for broadcasting orders that are distributed by the local orderDistributer.
 
-
-#### ch_rec_order`:
+#### ch_rec_ext_order:
 *Type:* `ExternalOrder`
 
 *Usage:* Receive order
@@ -166,7 +170,24 @@ The following figure shows an overview of the most important communication chann
 
 *Info*: Whenever the network-module detects that a message has been broadcasted to the order-executed-port (see network-module), the message is sent directly to the orderDistributer, using this channel.
 
+#### ch_int_order_exec:
+*Type:* `Int`
+
+*Usage:* Internal order executed
+
+*Info*: When an internal order is executed at a floor, all orders at that floor are executed. Whenever an order is executed, the floor of which order has been executed at is sent from the order handler to the order distributer.
+
+#### ch_order_timeout:
+*Type:* `ButtonEvent`
+
+*Usage:* Time-out for non-executed orders
+
+*Info*: When an internal order is not executed for a fixed time after it has been taken, the order is redistributed to another elevator.
+
+
 ### Goroutines
+
+These are the goroutines we use. The first three are used for polling new statuses, updates and timeouts. The last five are the main functions of the program, that takes care that each order is registered, distributed, executed and removed properly. To read more about these routines, see their respective modules.
 
 ```
   //Polling

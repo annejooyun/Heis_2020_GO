@@ -20,7 +20,7 @@ When the floor sensor detects a new floor, a message with the floor number is se
 If we have arrived at a new floor and we are meant to stop on the floor (i.e. there are order(s) that haven't been executed on the floor), we stop the elevator and execute the order(s). Since we now are at a new floor, the elevator object has now changed, and we send a message on the status update channel.
 
 
-**Time-out**
+**Time-out:**
 
 If we enter this case, it means that the elevator door has been open for >3s and it is time to close it. We turn off the light, and decides which direction the elevator should proceed with.
 

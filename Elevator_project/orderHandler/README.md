@@ -5,7 +5,7 @@ Note: this module has a help-function module containing lower-level help-functio
 The orderHandler-module distributes, executes and removes all orders created by, or assigned to the local elevator. It also manages the list of orders in the local elevator (which exists in the elevator object, see elevator-module). 
 There are two main routines in the orderHandler: `DistributeInternalOrders()` and `RegisterExecutedOrders()`. These are more closely explained under for the keen reader.
 
-###DistributeInternalOrders()
+### DistributeInternalOrders()
 
 #### Order_from_fsm
 Whenever a button is pushed on the local elevator, the order is sent from the stateMachine to the orderHandler. The orderHandler then decides wether the order must be taken directly (i.e. it is a cab order) or needs to be further examined in order to be distributed correctly (hall orders).

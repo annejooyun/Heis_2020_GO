@@ -6,8 +6,6 @@ import (
 	"../elevio"
 	"../orderHandler-helpfunc"
 	"../timer"
-
-	"fmt"
 )
 
 

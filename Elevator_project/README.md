@@ -165,3 +165,29 @@ The following figure shows an overview of the most important communication chann
 *Usage:* Receive order executed
 
 *Info*: Whenever the network-module detects that a message has been broadcasted to the order-executed-port (see network-module), the message is sent directly to the orderDistributer, using this channel.
+
+### Goroutines
+
+```
+  //Polling
+
+    go elevator.PollInternalElevatorStatus(&elev, ch_stat_updated, ch_int_stat_update) 
+
+    go orderDistributer.PollStatusUpdates(ch_int_stat_update, ch_ext_stat_update, ch_bcast_stat_update)
+
+    go orderDistributer.PollOrderTimeout(ch_order_timeout)
+
+
+  //Each button-push "travels" through these goroutines in order to be distributed and executed properly
+
+    go orderHandler.DistributeInternalOrders(&elev,ch_order_registered, ch_order_to_exec, ch_order_to_distribute, ch_new_order)
+
+    go orderDistributer.ReceiveOrders(ch_rec_ext_order, ch_order_to_exec)
+
+    go orderDistributer.DistributeOrders(ch_order_to_distribute, ch_order_to_exec, ch_bcast_order, ch_order_timeout)
+
+    go orderHandler.RegisterExecutedOrders(&elev,ch_order_executed, ch_int_order_exec)
+
+    go orderDistributer.RegisterExecutedOrders(ch_rec_order_exec, ch_int_order_exec, ch_bcast_order_exec)
+
+```

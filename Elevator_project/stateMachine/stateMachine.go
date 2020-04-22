@@ -4,8 +4,6 @@ import (
 	"../stateMachine-helpfunc"
 	"../elevator"
 	"../elevio"
-	"../timer"
-
 	"fmt"
 	)
 
@@ -15,15 +13,12 @@ func RunStateMachine(elev *elevator.Elev,
 										 order_registered chan elevio.ButtonEvent,
 										 new_order chan elevio.ButtonEvent,
 										 status_updated chan bool,
-										 order_executed chan bool) {
+										 order_executed chan bool,
+										 drv_buttons chan elevio.ButtonEvent,
+										 drv_floors chan int,
+										 ch_timer chan bool) {
 
-	drv_buttons := make(chan elevio.ButtonEvent)
-	drv_floors  := make(chan int)
-	ch_timer    := make(chan bool)
 
-	go elevio.PollButtons(drv_buttons)
-  go elevio.PollFloorSensor(drv_floors)
-  go timer.PollTimeOut(ch_timer)
 
 	for {
         select {
@@ -38,11 +33,14 @@ func RunStateMachine(elev *elevator.Elev,
 				//A button has been pressed
         case buttonPressed := <- drv_buttons:
 						//The order is sent on the channel order_registered to the order handler
+						fmt.Printf("Button pushed\n")
 						order_registered <- buttonPressed
+						fmt.Printf("Button registered\n")
 
 
 				//A new floor is detected
 				case floor := <- drv_floors:
+					fmt.Printf("Floor detected\n")
 
 						//Store the previous floor we were on
             prevFloor := elev.Floor
@@ -59,8 +57,8 @@ func RunStateMachine(elev *elevator.Elev,
 
 					//Timeout
 	        case <- ch_timer:
+						fmt.Printf("Timeout\n")
 	          stateMachineHF.DoorTimeout(elev)
-						fmt.Printf("Door timeout\n")
 						order_executed <- true
 						status_updated <- true
 

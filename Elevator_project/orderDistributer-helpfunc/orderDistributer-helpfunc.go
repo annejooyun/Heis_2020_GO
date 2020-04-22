@@ -3,7 +3,7 @@ package orderDistributerHF
 import(
   "../elevator"
   "../elevio"
-
+  "fmt"
   "time"
 )
 
@@ -35,12 +35,15 @@ var TIMER_ACTIVE_ORDERS [elevator.N_FLOORS][2] int64 //List of timestamps for or
 func BestChoice(order elevio.ButtonEvent) string {
   best_choice := ""
   best_cost  := 10000
+  fmt.Printf("%v\n",ADDED_ELEVATORS)
   for index,element := range(ELEVATOR_STATUS_LIST) {
     if ADDED_ELEVATORS[index] == "" {
+      fmt.Printf("4,%d\n",index)
       break
     } else if simpleCostFunction(element, order) < best_cost {
       best_cost = simpleCostFunction(element,order)
       best_choice = element.Id
+      fmt.Printf("5,%d\n",index)
     }
   }
   return best_choice
@@ -154,18 +157,24 @@ func numFloorsAway(elev elevator.Elev, order elevio.ButtonEvent) int{
   case elevio.BT_HallDown:
     destinationDir = -1
   }
+  fmt.Printf("Start for\n")
+  fmt.Printf("Current floor:%d\n", currentFloor)
+  fmt.Printf("Destination floor:%d\n", destinationFloor)
+  fmt.Printf("Current dir:%d\n", currentDir)
+  fmt.Printf("Destination dir:%d\n", destinationDir)
   for {
-    time.Sleep(POLL_RATE*time.Millisecond)
+    //time.Sleep(POLL_RATE*time.Millisecond)
     if currentFloor == destinationFloor && currentDir == destinationDir {
       break
     } else {
-      if currentFloor == maxFloor || currentFloor == 0 {
+      if (currentFloor == maxFloor && currentDir == 1) || (currentFloor == 0 && currentDir == -1) {
         currentDir = -currentDir
       }
       currentFloor += currentDir
       nFloors += 1
     }
   }
+  fmt.Printf("End for\n")
   return nFloors
 }
 
@@ -176,7 +185,8 @@ func simpleCostFunction(elev elevator.Elev, order elevio.ButtonEvent) int {
   if elev.CurrDirection == elevio.MD_Stop{
     cost += absInt(order.Floor - elev.Floor) * TRAVEL_TIME
   } else {
-    cost += numFloorsAway(elev, order) * TRAVEL_TIME
+    cost += 10
+    //cost += numFloorsAway(elev, order) * TRAVEL_TIME
   }
   return cost
 }

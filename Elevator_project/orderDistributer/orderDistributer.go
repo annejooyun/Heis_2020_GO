@@ -21,11 +21,16 @@ func DistributeOrders(order_to_distribute chan elevio.ButtonEvent,
   for {
     select{
     case orderReceived := <- order_to_distribute:
+      fmt.Printf("Order received to distribute\n")
 
       if !orderDistributerHF.AlreadyActiveOrder(orderReceived) {
+        fmt.Printf("Order not already active\n")
         owner := orderDistributerHF.BestChoice(orderReceived)
+        fmt.Printf("1\n")
         externalOrder := orderDistributerHF.ConvertToExternalOrder(orderReceived,owner)
+        fmt.Printf("2\n")
         broadcast_order <- externalOrder
+        fmt.Printf("Order broadcasted\n")
       }
 
     case orderTimeout:= <- order_from_timeout:
@@ -43,11 +48,11 @@ func ReceiveOrders(receive_external_order chan orderDistributerHF.ExtOrder, orde
       internalOrder := orderDistributerHF.ConvertToInternalOrder(extOrderReceived)
       orderDistributerHF.SetOrderActive(internalOrder, true)
 
-      fmt.Printf("Active orders table is updated: %v\n", orderDistributerHF.ACTIVE_ORDERS)
+      //fmt.Printf("Active orders table is updated: %v\n", orderDistributerHF.ACTIVE_ORDERS)
 
       if extOrderReceived.Id == elevator.LOCAL_ELEV_ID {
         order_to_execute <- internalOrder
-        fmt.Printf("Executing external order on floor: %d\n",internalOrder.Floor)
+        //fmt.Printf("Executing external order on floor: %d\n",internalOrder.Floor)
       }
     }
   }
@@ -59,6 +64,7 @@ func RegisterExecutedOrders(receive_orders_executed chan int, internal_order_exe
     select{
     case floor := <- receive_orders_executed: //ordersExecuted = floor
       orderDistributerHF.RemoveOrdersInActiveOrders(floor)
+      fmt.Printf("Active orders table is updated: %v\n", orderDistributerHF.ACTIVE_ORDERS)
 
 
       case floor := <- internal_order_executed: //ordersExecuted = [order up, order down,floor]

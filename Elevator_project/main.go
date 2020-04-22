@@ -8,6 +8,7 @@ import (
   "./network"
   "./orderDistributer"
   "./orderDistributer-helpfunc"
+  "./timer"
 )
 
 var TCP_ConnectionPort = "15657"
@@ -89,8 +90,19 @@ func main(){
     network.InitializeOrderUpdates(ch_bcast_order_exec, ch_rec_order_exec)
 
 
-    //START THE ELEVATOR STATE MACHINE
-    stateMachine.RunStateMachine(&elev, ch_order_registered, ch_new_order, ch_stat_updated, ch_order_executed)
 
+
+    drv_buttons := make(chan elevio.ButtonEvent)
+  	drv_floors  := make(chan int)
+  	ch_timer    := make(chan bool)
+
+  	go elevio.PollButtons(drv_buttons)
+    go elevio.PollFloorSensor(drv_floors)
+    go timer.PollTimeOut(ch_timer)
+
+    //START THE ELEVATOR STATE MACHINE
+    go stateMachine.RunStateMachine(&elev, ch_order_registered, ch_new_order, ch_stat_updated, ch_order_executed, drv_buttons, drv_floors, ch_timer)
+
+    select{}
 
 }

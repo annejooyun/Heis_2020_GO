@@ -77,10 +77,6 @@ func UpdateElevatorDirectionsAndStates(elev *Elev, direction elevio.MotorDirecti
   updateCurrDirection(elev, direction)
   updatePrevState(elev)
   updateCurrState(elev, state)
-  fmt.Printf("PrevDir = %d\n", elev.PrevDirection)
-  fmt.Printf("CurrDir = %d\n", elev.CurrDirection)
-  fmt.Printf("PrevState = %d\n", elev.PrevState)
-  fmt.Printf("CurrState = %d\n", elev.CurrState)
 }
 
 

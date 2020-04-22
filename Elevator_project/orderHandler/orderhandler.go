@@ -4,6 +4,7 @@ import (
   "../elevator"
   "../elevio"
   "../orderHandler-helpfunc"
+  "fmt"
 )
 
 
@@ -18,6 +19,7 @@ func DistributeInternalOrders(elev *elevator.Elev,
 
     //Order from the elevators's own state machine
     case order := <- order_from_fsm:
+      fmt.Printf("order received OH\n")
       if order.Button == elevio.BT_Cab {
         orderHandlerHF.TakeOrder(elev,order)
         new_order <- order

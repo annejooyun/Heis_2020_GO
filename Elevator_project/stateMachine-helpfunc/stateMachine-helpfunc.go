@@ -112,10 +112,9 @@ func shouldIStop(elev *elevator.Elev) bool {
 		return isOrderOnFloor(elev)|| !orderHandlerHF.OrdersBelow(elev)
 
 	case elevio.MD_Stop:
-
-	default:
+		return true
 	}
-	return false
+	return true
 }
 
 

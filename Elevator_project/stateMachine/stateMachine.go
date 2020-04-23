@@ -33,9 +33,7 @@ func RunStateMachine(elev *elevator.Elev,
 				//A button has been pressed
         case buttonPressed := <- drv_buttons:
 						//The order is sent on the channel order_registered to the order handler
-						fmt.Printf("Button pushed\n")
 						order_registered <- buttonPressed
-						fmt.Printf("Button registered\n")
 
 
 				//A new floor is detected

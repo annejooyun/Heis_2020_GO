@@ -21,16 +21,22 @@ func DistributeOrders(order_to_distribute chan elevio.ButtonEvent,
   for {
     select{
     case orderReceived := <- order_to_distribute:
-      fmt.Printf("Order received to distribute\n")
-
       if !orderDistributerHF.AlreadyActiveOrder(orderReceived) {
-        fmt.Printf("Order not already active\n")
         owner := orderDistributerHF.BestChoice(orderReceived)
-        fmt.Printf("1\n")
+
+        orderDistributerHF.SetOrderActive(orderReceived, true)
+
+
+        if owner == elevator.LOCAL_ELEV_ID {
+          order_to_execute <- orderReceived
+        }
+
         externalOrder := orderDistributerHF.ConvertToExternalOrder(orderReceived,owner)
-        fmt.Printf("2\n")
+
+        //Print thrice to minimize probability of packet loss
         broadcast_order <- externalOrder
-        fmt.Printf("Order broadcasted\n")
+        broadcast_order <- externalOrder
+        broadcast_order <- externalOrder
       }
 
     case orderTimeout:= <- order_from_timeout:
@@ -67,8 +73,12 @@ func RegisterExecutedOrders(receive_orders_executed chan int, internal_order_exe
       fmt.Printf("Active orders table is updated: %v\n", orderDistributerHF.ACTIVE_ORDERS)
 
 
-      case floor := <- internal_order_executed: //ordersExecuted = [order up, order down,floor]
-        bcast_order_executed <- floor
+    case floor := <- internal_order_executed: //ordersExecuted = [order up, order down,floor]
+      orderDistributerHF.RemoveOrdersInActiveOrders(floor)
+      fmt.Printf("Active orders table is updated: %v\n", orderDistributerHF.ACTIVE_ORDERS)
+      bcast_order_executed <- floor
+      bcast_order_executed <- floor
+      bcast_order_executed <- floor
     }
   }
 }
@@ -82,6 +92,8 @@ func PollStatusUpdates(internal_status_update chan elevator.Elev,
     select {
 
     case elevator_status := <- internal_status_update:
+      broadcast_status_update <- elevator_status
+      broadcast_status_update <- elevator_status
       broadcast_status_update <- elevator_status
       orderDistributerHF.UpdateElevatorStatusList(elevator_status)
 

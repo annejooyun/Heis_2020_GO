@@ -52,7 +52,7 @@ func main(){
     ch_rec_ext_order := make(chan orderDistributerHF.ExtOrder)
 
     ch_bcast_order_exec := make(chan int)
-    ch_rec_order_exec := make(chan int,2)
+    ch_rec_order_exec := make(chan int)
 
     ch_int_order_exec := make(chan int)
 
